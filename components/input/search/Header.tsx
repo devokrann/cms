@@ -11,8 +11,8 @@ export default function Header() {
 		<>
 			<TextInput
 				onClick={spotlight.open}
-				leftSection={<IconSearch size={16} stroke={1} />}
-				placeholder="Search..."
+				leftSection={<IconSearch size={16} stroke={1.5} />}
+				placeholder="Search"
 				styles={{
 					input: { paddingLeft: "var(--mantine-spacing-xl)" },
 				}}
@@ -20,11 +20,11 @@ export default function Header() {
 
 			<Spotlight
 				actions={actions}
-				nothingFound="Nothing found..."
+				nothingFound="Nothing found"
 				highlightQuery
 				searchProps={{
-					leftSection: <IconSearch size={20} stroke={1} />,
-					placeholder: "Search...",
+					leftSection: <IconSearch size={20} stroke={1.5} />,
+					placeholder: "Search",
 				}}
 			/>
 		</>

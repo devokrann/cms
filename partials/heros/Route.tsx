@@ -4,21 +4,12 @@ import React from "react";
 
 import { usePathname } from "next/navigation";
 
-import { Group, Title } from "@mantine/core";
-
 import BreadcrumbMain from "@/components/breadcrumbs/Main";
 import { crumbify } from "@/handlers/parsers/string";
 
-export default function Route({ title }: { title?: string }) {
+export default function Route() {
 	const pathname = usePathname();
 	const segments = crumbify(pathname);
 
-	return (
-		<Group align="center" justify="space-between">
-			<BreadcrumbMain data={segments} />
-			<Title order={1} fw={500} fz={24}>
-				{title ? title : segments[segments.length - 1].label}
-			</Title>
-		</Group>
-	);
+	return <BreadcrumbMain data={segments} />;
 }

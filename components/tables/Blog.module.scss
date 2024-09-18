@@ -1,0 +1,10 @@
+.thead {
+	background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-default-border));
+	color: light-dark(inherit, var(--mantine-color-text));
+}
+
+.caption {
+	background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-default-border));
+	color: light-dark(inherit, var(--mantine-color-text));
+	padding: var(--mantine-spacing-md) var(--mantine-spacing-xs);
+}

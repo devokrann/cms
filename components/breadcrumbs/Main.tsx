@@ -14,7 +14,15 @@ export default function Main({ data }: { data: typeLink[] }) {
 	const active = (breadcrumb: typeLink) => data.indexOf(breadcrumb) == data.length - 1;
 
 	return (
-		<Breadcrumbs separator={<IconChevronRight size={12} stroke={2} color="var(--mantine-color-sec-6)" />}>
+		<Breadcrumbs
+			separator={
+				<IconChevronRight
+					size={12}
+					stroke={1.5}
+					color="light-dark(var(--mantine-color-pri-6),var(--mantine-color-pri-6))"
+				/>
+			}
+		>
 			{data.map(item => (
 				<Anchor
 					key={item.link}

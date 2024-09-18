@@ -1,9 +1,13 @@
 .link {
 	text-decoration: none;
-	font-size: var(--mantine-font-size-sm);
+	font-size: var(--mantine-font-size-xs);
 	font-weight: 500;
 	color: var(--mantine-color-text);
 	transition: 0.25s all ease;
+
+	@include larger-than($mantine-breakpoint-lg) {
+		font-size: var(--mantine-font-size-sm);
+	}
 
 	&:hover {
 		color: var(--mantine-color-pri-8);
