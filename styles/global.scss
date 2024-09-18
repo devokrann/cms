@@ -1,0 +1,49 @@
+:root {
+	// @mixin light-root {
+	// 	--color: red;
+	// }
+
+	// @mixin dark-root {
+	// 	--color: blue;
+	// }
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+html,
+body {
+	max-width: 100vw;
+}
+
+body {
+	@include light {
+		color: var(--mantine-color-dark-3);
+		background-color: var(--mantine-color-body);
+	}
+
+	@include dark {
+		color: var(--mantine-color-dark-3);
+		background-color: var(--mantine-color-body);
+	}
+}
+
+// responsive styles
+.textResponsive {
+	font-size: var(--mantine-font-size-xs) !important;
+
+	@include larger-than($mantine-breakpoint-xs) {
+		font-size: var(--mantine-font-size-sm) !important;
+	}
+
+	@include larger-than($mantine-breakpoint-sm) {
+		font-size: var(--mantine-font-size-md) !important;
+	}
+}

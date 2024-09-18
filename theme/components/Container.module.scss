@@ -1,0 +1,21 @@
+.root {
+	@include larger-than($mantine-breakpoint-xs) {
+		max-width: 36em;
+	}
+
+	@include larger-than($mantine-breakpoint-sm) {
+		max-width: 48em;
+	}
+
+	@include larger-than($mantine-breakpoint-md) {
+		max-width: 62em;
+	}
+
+	@include larger-than($mantine-breakpoint-lg) {
+		max-width: 75em;
+	}
+
+	@include larger-than($mantine-breakpoint-xl) {
+		max-width: 88em;
+	}
+}

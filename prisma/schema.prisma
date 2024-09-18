@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma migrate dev --name init -> sync database
+// npx prisma db push -> sync database
+
+generator client {
+  provider = "prisma-client-js"
+  // previewFeatures = ["postgresqlExtensions"] // enables postgresql extensions
+  // previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEXT_DATABASE_URL") // uses connection pooling
+  // directUrl = env("NEXT_DIRECT_URL") // uses a direct connection
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  verified      Boolean         @default(false)
+  password      String?
+  name          String?
+  image         String?
+  emailVerified DateTime?       @map(name: "email_verified")
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[] // Optional for WebAuthn support
+  role          Role            @default(USER)
+  posts         Post[]
+  otps          Otp[]
+  otls          Otl[]
+  profile       Profile?
+  createdAt     DateTime        @default(now()) @map(name: "created_at")
+  updatedAt     DateTime        @updatedAt @map(name: "updated_at")
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Account {
+  type              String
+  provider          String
+  providerAccountId String   @map(name: "provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now()) @map(name: "created_at")
+  updatedAt         DateTime @updatedAt @map(name: "updated_at")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String   @unique @map("user_id")
+
+  @@id([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  sessionToken String   @unique @map(name: "session_token")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map(name: "created_at")
+  updatedAt    DateTime @updatedAt @map(name: "updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String   @unique @map("user_id")
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique @map(name: "credential_id")
+  providerAccountId    String  @map(name: "provider_account_id")
+  credentialPublicKey  String  @map(name: "credential_public_key")
+  counter              Int
+  credentialDeviceType String  @map(name: "credential_device_type")
+  credentialBackedUp   Boolean @map(name: "credential_backed_up")
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String  @map(name: "user_id")
+
+  @@id([userId, credentialID])
+  @@map("authenticators")
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  firstName String?  @map(name: "first_name")
+  lastName  String?  @map(name: "last_name")
+  bio       String?
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique @map("user_id")
+
+  @@map("profiles")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map(name: "created_at")
+  updatedAt   DateTime  @updatedAt @map(name: "updated_at")
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique @map("user_id")
+  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId  String?   @unique @map("category_id")
+
+  @@unique([userId, title])
+  @@map(name: "posts")
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String
+  posts Post[]
+
+  @@map(name: "categories")
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  otp       String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  expiresAt DateTime @updatedAt @map(name: "expires_at")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique @map("user_id")
+
+  @@map(name: "otps")
+}
+
+model Otl {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  otl       String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  expiresAt DateTime @updatedAt @map(name: "expires_at")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique @map("user_id")
+
+  @@map(name: "otls")
+}

@@ -1,0 +1,15 @@
+.root {
+	box-shadow: var(--mantine-shadow-xs);
+
+	&[data-variant="success"] {
+		.icon {
+			background-color: var(--mantine-color-green-6);
+		}
+	}
+
+	&[data-variant="failed"] {
+		.icon {
+			background-color: var(--mantine-color-red-6);
+		}
+	}
+}

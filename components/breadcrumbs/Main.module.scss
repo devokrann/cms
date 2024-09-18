@@ -1,0 +1,11 @@
+.link {
+	text-decoration: none;
+	font-size: var(--mantine-font-size-sm);
+	font-weight: 500;
+	color: var(--mantine-color-text);
+	transition: 0.25s all ease;
+
+	&:hover {
+		color: var(--mantine-color-pri-8);
+	}
+}

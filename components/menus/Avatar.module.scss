@@ -1,0 +1,12 @@
+.avatar {
+	border: 2px solid var(--mantine-color-default-border);
+	transition: 0.25s all ease;
+
+	@include hover {
+		cursor: pointer;
+		border: 2px solid var(--mantine-color-pri-6);
+	}
+}
+
+.dropdown {
+}
