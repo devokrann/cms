@@ -6,13 +6,13 @@ import {
 	IconBrandYoutube,
 } from "@tabler/icons-react";
 
-const companyName = "Brix";
+const companyName = "CMS";
 const appName = companyName;
 
 const contact = {
 	name: { company: companyName, app: appName },
 	phones: [{ type: "main", label: "(254) 123 456-789", value: "+254123456789" }],
-	emails: [{ type: "main", value: "info@brix.com" }],
+	emails: [{ type: "main", value: "info@cms.com" }],
 	socials: [
 		{
 			title: `${companyName} @ Twitter`,
