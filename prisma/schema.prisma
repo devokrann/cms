@@ -19,6 +19,17 @@ datasource db {
   // directUrl = env("NEXT_DIRECT_URL") // uses a direct connection
 }
 
+enum Role {
+  USER
+  ADMIN
+  DEV
+}
+
+enum Status {
+  ACTIVE
+  SUSPENDED
+}
+
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
@@ -30,7 +41,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Authenticator Authenticator[] // Optional for WebAuthn support
-  role          Role            @default(ADMIN)
+  role          Role            @default(USER)
+  status        Status          @default(ACTIVE)
   posts         Post[]
   otps          Otp[]
   otls          Otl[]
@@ -41,10 +53,97 @@ model User {
   @@map("users")
 }
 
-enum Role {
-  ADMIN
-  DEV
+model Profile {
+  id        String   @id @default(cuid())
+  firstName String?  @map(name: "first_name")
+  lastName  String?  @map(name: "last_name")
+  bio       String?
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique @map("user_id")
+
+  @@map("profiles")
 }
+
+// app models
+
+model Post {
+  title       String
+  description String
+  published   Boolean @default(false)
+
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String    @unique @map("user_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @unique @map("category_id")
+  tags       Tag[]
+
+  @@unique([userId, title])
+  @@map(name: "posts")
+}
+
+model Category {
+  title String
+
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  posts Post[]
+
+  @@map(name: "categories")
+}
+
+model Tag {
+  title String
+
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  posts Post[]
+
+  @@map(name: "tags")
+}
+
+// auth models
+
+model Otp {
+  email     String   @unique
+  otp       String
+  expiresAt DateTime @updatedAt @map(name: "expires_at")
+
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @map("user_id")
+
+  @@map(name: "otps")
+}
+
+model Otl {
+  email     String   @unique
+  otl       String
+  expiresAt DateTime @updatedAt @map(name: "expires_at")
+
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @map("user_id")
+
+  @@map(name: "otls")
+}
+
+// auth.js models
 
 model Account {
   type              String
@@ -100,67 +199,4 @@ model Authenticator {
 
   @@id([userId, credentialID])
   @@map("authenticators")
-}
-
-model Profile {
-  id        String   @id @default(cuid())
-  firstName String?  @map(name: "first_name")
-  lastName  String?  @map(name: "last_name")
-  bio       String?
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique @map("user_id")
-
-  @@map("profiles")
-}
-
-model Post {
-  id          String    @id @default(cuid())
-  title       String
-  description String
-  published   Boolean   @default(false)
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-  updatedAt   DateTime  @updatedAt @map(name: "updated_at")
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String    @unique @map("user_id")
-  category    Category? @relation(fields: [categoryId], references: [id])
-  categoryId  String?   @unique @map("category_id")
-
-  @@unique([userId, title])
-  @@map(name: "posts")
-}
-
-model Category {
-  id    String @id @default(cuid())
-  name  String
-  posts Post[]
-
-  @@map(name: "categories")
-}
-
-model Otp {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  otp       String
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-  expiresAt DateTime @updatedAt @map(name: "expires_at")
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique @map("user_id")
-
-  @@map(name: "otps")
-}
-
-model Otl {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  otl       String
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-  expiresAt DateTime @updatedAt @map(name: "expires_at")
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique @map("user_id")
-
-  @@map(name: "otls")
 }
