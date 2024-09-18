@@ -4,9 +4,9 @@ import LayoutSection from "../Section";
 
 import PartialHeroRoute from "@/partials/heros/Route";
 
-export default function Route() {
+export default function Main() {
 	return (
-		<LayoutSection containerized="responsive">
+		<LayoutSection containerized="responsive" mb={"xl"}>
 			<PartialHeroRoute />
 		</LayoutSection>
 	);

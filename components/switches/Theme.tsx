@@ -12,8 +12,8 @@ export default function Theme() {
 		<Switch
 			radius={"sm"}
 			defaultChecked={colorScheme == "dark" ? true : false}
-			offLabel={<IconMoonStars size={16} stroke={2.5} />}
-			onLabel={<IconSun size={16} stroke={2.5} />}
+			offLabel={<IconMoonStars size={16} stroke={1.5} />}
+			onLabel={<IconSun size={16} stroke={1.5} />}
 			onChange={() => setColorScheme(computedColorScheme == "dark" ? "light" : "dark")}
 		/>
 	);

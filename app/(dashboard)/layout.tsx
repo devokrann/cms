@@ -6,8 +6,9 @@ import HeaderMain from "@/partials/headers/Main";
 import AsideLeft from "@/partials/asides/Left";
 
 import { Metadata } from "next";
+import contact from "@/data/contact";
 
-export const metadata: Metadata = { title: `Dashboard` };
+export const metadata: Metadata = { title: { default: `Dashboard`, template: `%s - ${contact.name.app}` } };
 
 export default function LayoutDashboard({
 	children, // will be a page or nested layout
