@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-import { Button, Flex, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Card, Flex, Group, Stack, Text, Title } from "@mantine/core";
 
 import { IconArrowRight } from "@tabler/icons-react";
 
@@ -13,6 +13,7 @@ import LayoutSection from "@/layouts/Section";
 import AuthSignOut from "@/components/auth/signOut";
 
 import { auth } from "@/auth";
+import Brand from "@/components/Brand";
 
 export const metadata: Metadata = { title: "Sign Out" };
 
@@ -24,31 +25,39 @@ export default async function SignOut() {
 	return (
 		<LayoutPage>
 			<LayoutSection containerized="xs" padded>
-				<Flex direction={"column"} align={{ base: "center", md: "start" }} gap={"xl"}>
-					<Stack gap={"xs"}>
-						<Title ta={{ base: "center", md: "start" }} order={1} fw={"bold"}>
-							Sign Out
-						</Title>
-
-						<Stack gap={0}>
-							<Text ta={{ base: "center", md: "start" }}>Are you sure you want to sign out?</Text>
-						</Stack>
-					</Stack>
-
-					<Group>
-						<AuthSignOut>
-							<Button>Sign Out</Button>
-						</AuthSignOut>
-						<Button
-							component={Link}
-							href={"/"}
-							variant="light"
-							rightSection={<IconArrowRight size={16} stroke={2} />}
-						>
-							Go Home
-						</Button>
+				<Stack gap={40}>
+					<Group justify="center">
+						<Brand height={32} />
 					</Group>
-				</Flex>
+
+					<Card withBorder>
+						<Flex direction={"column"} align={{ base: "center" }} gap={"xl"}>
+							<Stack gap={"xs"}>
+								<Title ta={{ base: "center" }} order={1} fw={"bold"}>
+									Sign Out
+								</Title>
+
+								<Stack gap={0}>
+									<Text ta={{ base: "center" }}>Are you sure you want to sign out?</Text>
+								</Stack>
+							</Stack>
+
+							<Group>
+								<AuthSignOut>
+									<Button>Sign Out</Button>
+								</AuthSignOut>
+								<Button
+									component={Link}
+									href={"/"}
+									variant="light"
+									rightSection={<IconArrowRight size={16} stroke={2} />}
+								>
+									Go Home
+								</Button>
+							</Group>
+						</Flex>
+					</Card>
+				</Stack>
 			</LayoutSection>
 		</LayoutPage>
 	);

@@ -2,22 +2,20 @@
 
 import React, { useState } from "react";
 
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-
 import {
 	Anchor,
 	Box,
 	Button,
+	Card,
 	Center,
 	Divider,
 	Grid,
 	GridCol,
+	Group,
 	PasswordInput,
 	Stack,
 	Text,
 	TextInput,
-	Title,
 	Transition,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -38,9 +36,9 @@ import { typeSignUp } from "@/types/form";
 
 import { signIn as authSignIn } from "next-auth/react";
 import { millToMinSec } from "@/handlers/parsers/number";
+import Brand from "@/components/Brand";
 
 export default function SignUp({ userEmail }: { userEmail?: string }) {
-	const router = useRouter();
 	const [submitted, setSubmitted] = useState(false);
 	const [verify, setverify] = useState(userEmail ? true : false);
 
@@ -391,13 +389,10 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 				{styles => (
 					<div style={styles}>
 						<LayoutSection padded containerized={"xs"}>
-							<Stack gap={40} px={{ md: 40 }}>
-								<AuthHeader
-									data={{
-										title: "Create Your Account",
-										desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vulputate ut laoreet velit ma.",
-									}}
-								/>
+							<Stack gap={40}>
+								<Group justify="center">
+									<Brand height={32} />
+								</Group>
 
 								<Box
 									component="form"
@@ -405,43 +400,56 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 									noValidate
 								>
 									<Stack gap={40}>
-										<Grid>
-											<GridCol span={{ base: 12, sm: 12 }}>
-												<TextInput
-													required
-													label={"Email"}
-													placeholder="Your Email"
-													{...form.getInputProps("email")}
+										<Card withBorder>
+											<Stack>
+												<AuthHeader
+													data={{
+														title: "Create Your account",
+														desc: `Enter your details to create an account.`,
+													}}
 												/>
-											</GridCol>
-											<GridCol span={{ base: 12, xs: 12 }}>
-												<PasswordInput
-													required
-													label={"Password"}
-													placeholder="Your password"
-													{...form.getInputProps("password")}
-												/>
-											</GridCol>
-											<GridCol span={{ base: 12, xs: 12 }}>
-												<PasswordInput
-													required
-													label={"Confirm Password"}
-													placeholder="Confirm your password"
-													{...form.getInputProps("passwordConfirm")}
-												/>
-											</GridCol>
-											<GridCol span={12} mt={"lg"}>
-												<Center>
-													<Button
-														w={{ base: "100%", xs: "50%", md: "100%" }}
-														type="submit"
-														loading={submitted}
-													>
-														{submitted ? "Signing Up" : "Sign Up"}
-													</Button>
-												</Center>
-											</GridCol>
-										</Grid>
+
+												<Divider />
+
+												<Grid>
+													<GridCol span={{ base: 12, sm: 12 }}>
+														<TextInput
+															required
+															label={"Email"}
+															placeholder="Your Email"
+															{...form.getInputProps("email")}
+														/>
+													</GridCol>
+													<GridCol span={{ base: 12, xs: 12 }}>
+														<PasswordInput
+															required
+															label={"Password"}
+															placeholder="Your password"
+															{...form.getInputProps("password")}
+														/>
+													</GridCol>
+													<GridCol span={{ base: 12, xs: 12 }}>
+														<PasswordInput
+															required
+															label={"Confirm Password"}
+															placeholder="Confirm your password"
+															{...form.getInputProps("passwordConfirm")}
+														/>
+													</GridCol>
+													<GridCol span={12} mt={"lg"}>
+														<Center>
+															<Button
+																w={{ base: "100%", xs: "50%", md: "100%" }}
+																type="submit"
+																loading={submitted}
+															>
+																{submitted ? "Signing Up" : "Sign Up"}
+															</Button>
+														</Center>
+													</GridCol>
+												</Grid>
+											</Stack>
+										</Card>
 
 										<Divider label="or continue with" />
 
@@ -473,14 +481,10 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 				{styles => (
 					<div style={styles}>
 						<LayoutSection padded containerized={"xs"}>
-							<Stack gap={40} px={{ md: 40 }}>
-								<AuthHeader
-									data={{
-										title: "Verify Your Account",
-										desc: `A one-time code has been sent to the provided email ${form.values.email}. Enter
-										the code below to verify.`,
-									}}
-								/>
+							<Stack gap={40}>
+								<Group justify="center">
+									<Brand height={32} />
+								</Group>
 
 								<Box
 									component="form"
@@ -488,48 +492,61 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 									noValidate
 								>
 									<Stack gap={"xl"}>
-										<Grid>
-											<GridCol span={{ base: 12 }}>
-												<Stack gap={4} align="end">
-													<TextInput
-														required
-														label={`One-time Code`}
-														placeholder="Your Code"
-														{...form2.getInputProps("otp")}
-														w={"100%"}
-													/>
-													<Anchor
-														underline="hover"
-														inherit
-														fz={"xs"}
-														ta={"end"}
-														w={"fit-content"}
-														onClick={() => switchContext()}
-													>
-														Change email
-													</Anchor>
-												</Stack>
-											</GridCol>
-											<GridCol span={{ base: 12 }}>
-												<Grid mt={"md"}>
-													<GridCol span={{ base: 12, xs: 6 }}>
-														<Button
-															fullWidth
-															loading={requested}
-															variant="light"
-															onClick={() => handleRequest()}
-														>
-															{requested ? "Requesting" : "Request Another"}
-														</Button>
+										<Card withBorder>
+											<Stack>
+												<AuthHeader
+													data={{
+														title: "Verify Your Account",
+														desc: `Enter the code sent to the provided email.`,
+													}}
+												/>
+
+												<Divider />
+
+												<Grid>
+													<GridCol span={{ base: 12 }}>
+														<Stack gap={4} align="end">
+															<TextInput
+																required
+																label={`One-time Code`}
+																placeholder="Your Code"
+																{...form2.getInputProps("otp")}
+																w={"100%"}
+															/>
+															<Anchor
+																underline="hover"
+																inherit
+																fz={"xs"}
+																ta={"end"}
+																w={"fit-content"}
+																onClick={() => switchContext()}
+															>
+																Change email
+															</Anchor>
+														</Stack>
 													</GridCol>
-													<GridCol span={{ base: 12, xs: 6 }}>
-														<Button fullWidth type="submit" loading={submitted}>
-															{submitted ? "Verifying" : "Verify"}
-														</Button>
+													<GridCol span={{ base: 12 }}>
+														<Grid mt={"md"}>
+															<GridCol span={{ base: 12, xs: 6 }}>
+																<Button
+																	fullWidth
+																	loading={requested}
+																	variant="light"
+																	onClick={() => handleRequest()}
+																>
+																	{requested ? "Requesting" : "Request Another"}
+																</Button>
+															</GridCol>
+															<GridCol span={{ base: 12, xs: 6 }}>
+																<Button fullWidth type="submit" loading={submitted}>
+																	{submitted ? "Verifying" : "Verify"}
+																</Button>
+															</GridCol>
+														</Grid>
 													</GridCol>
 												</Grid>
-											</GridCol>
-										</Grid>
+											</Stack>
+										</Card>
 
 										<Transition mounted={time != undefined} transition="fade" duration={0}>
 											{styles => (

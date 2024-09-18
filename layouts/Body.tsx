@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Container, Divider, Flex } from "@mantine/core";
+import { Box, Divider, Flex } from "@mantine/core";
 
 import { typeBody } from "@/types/layout";
 import { widths } from "@/types/mantine";
@@ -11,11 +11,6 @@ export default function Body({ children, bar, header, nav, hero, aside, footer }
 			component="aside"
 			visibleFrom="md"
 			w={width ? { md: `${width.md}%`, lg: `${width.lg}%` } : { md: `${33}%`, lg: `${25}%` }}
-			style={{
-				position: "sticky",
-				top: 64,
-				maxHeight: "100%",
-			}}
 		>
 			{side}
 		</Box>
@@ -39,7 +34,7 @@ export default function Body({ children, bar, header, nav, hero, aside, footer }
 			{nav && nav}
 			{hero && hero}
 			{aside ? (
-				<Container size={"responsive"} component={"article"}>
+				<Box component={"article"} px={"md"}>
 					<Flex gap={aside.gap ? aside.gap : "xl"}>
 						{aside.left && handleAside(aside.left.component, aside.left.width)}
 						{aside.left?.withBorder && <Divider orientation="vertical" visibleFrom="md" />}
@@ -47,7 +42,7 @@ export default function Body({ children, bar, header, nav, hero, aside, footer }
 						{aside.right?.withBorder && <Divider orientation="vertical" visibleFrom="md" />}
 						{aside.right && handleAside(aside.right.component, aside.right.width)}
 					</Flex>
-				</Container>
+				</Box>
 			) : (
 				children
 			)}
