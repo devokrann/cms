@@ -5,10 +5,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import AuthHeader from "@/partials/auth/Header";
+
 import {
 	Anchor,
 	Box,
 	Button,
+	Card,
 	Center,
 	Checkbox,
 	Divider,
@@ -112,49 +115,72 @@ export default function SignIn() {
 	return (
 		<Box component="form" onSubmit={form.onSubmit(values => handleSubmit(values))} noValidate>
 			<Stack gap={40}>
-				<Grid>
-					<GridCol span={{ base: 12, sm: 12 }}>
-						<TextInput required label={"Email"} placeholder="Your Email" {...form.getInputProps("email")} />
-					</GridCol>
-					<GridCol span={{ base: 12, xs: 12 }}>
-						<Stack gap={"xs"}>
-							<PasswordInput
-								required
-								label={"Password"}
-								placeholder="Your password"
-								{...form.getInputProps("password")}
-								w={"100%"}
-							/>
+				<Card withBorder>
+					<Stack>
+						<AuthHeader
+							data={{
+								title: "Welcome Back",
+								desc: `Enter your credentials to access your account.`,
+							}}
+						/>
 
-							<Group justify="space-between">
-								<Checkbox
-									label="Remember me"
-									key={form.key("remember")}
-									{...form.getInputProps("remember", { type: "checkbox" })}
+						<Divider />
+
+						<Grid>
+							<GridCol span={{ base: 12, sm: 12 }}>
+								<TextInput
+									required
+									label={"Email"}
+									placeholder="Your Email"
+									{...form.getInputProps("email")}
 								/>
+							</GridCol>
+							<GridCol span={{ base: 12, xs: 12 }}>
+								<Stack gap={"xs"}>
+									<PasswordInput
+										required
+										label={"Password"}
+										placeholder="Your password"
+										{...form.getInputProps("password")}
+										w={"100%"}
+									/>
 
-								<Anchor
-									underline="hover"
-									inherit
-									fz={"xs"}
-									ta={"end"}
-									w={"fit-content"}
-									component={Link}
-									href={"/auth/password/forgot"}
-								>
-									Forgot password
-								</Anchor>
-							</Group>
-						</Stack>
-					</GridCol>
-					<GridCol span={12} mt={"md"}>
-						<Center>
-							<Button w={{ base: "100%", xs: "50%", md: "100%" }} type="submit" loading={submitted}>
-								{submitted ? "Signing In" : "Sign In"}
-							</Button>
-						</Center>
-					</GridCol>
-				</Grid>
+									<Group justify="space-between">
+										<Checkbox
+											label="Remember me"
+											size="xs"
+											key={form.key("remember")}
+											{...form.getInputProps("remember", { type: "checkbox" })}
+										/>
+
+										<Anchor
+											underline="hover"
+											inherit
+											fz={"xs"}
+											ta={"end"}
+											w={"fit-content"}
+											component={Link}
+											href={"/auth/password/forgot"}
+										>
+											Forgot password
+										</Anchor>
+									</Group>
+								</Stack>
+							</GridCol>
+							<GridCol span={12} mt={"md"}>
+								<Center>
+									<Button
+										w={{ base: "100%", xs: "50%", md: "100%" }}
+										type="submit"
+										loading={submitted}
+									>
+										{submitted ? "Signing In" : "Sign In"}
+									</Button>
+								</Center>
+							</GridCol>
+						</Grid>
+					</Stack>
+				</Card>
 
 				<Divider label="or continue with" />
 

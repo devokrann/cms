@@ -3,11 +3,11 @@ import React from "react";
 import LayoutBody from "@/layouts/Body";
 import FooterMain from "@/partials/footers/Main";
 import HeaderMain from "@/partials/headers/Main";
+import AsideLeft from "@/partials/asides/Left";
 
 import { Metadata } from "next";
-import contact from "@/data/contact";
 
-export const metadata: Metadata = { title: { default: "Dashboard", template: `%s - Dashboard - ${contact.name.app}` } };
+export const metadata: Metadata = { title: `Dashboard` };
 
 export default function LayoutDashboard({
 	children, // will be a page or nested layout
@@ -15,7 +15,11 @@ export default function LayoutDashboard({
 	children: React.ReactNode;
 }) {
 	return (
-		<LayoutBody header={<HeaderMain />} footer={<FooterMain />}>
+		<LayoutBody
+			header={<HeaderMain />}
+			aside={{ left: { component: <AsideLeft />, withBorder: true }, gap: "md" }}
+			footer={<FooterMain />}
+		>
 			<main>{children}</main>
 		</LayoutBody>
 	);

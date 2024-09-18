@@ -19,14 +19,10 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 
 import {
-	IconSettings,
 	IconUser,
 	IconLogout,
 	IconPackage,
-	IconCoins,
-	IconMapPin,
 	IconBellRinging,
-	IconDashboard,
 	IconHeart,
 	IconStar,
 	IconHelpCircle,
@@ -152,10 +148,6 @@ export default function Avatar() {
 								<Text fz={"xs"} lh={1} ta={"center"}>
 									({session.data?.user.email})
 								</Text>
-
-								{/* <Text fz={"xs"} lh={1} ta={"center"}>
-									({session.data?.expires})
-								</Text> */}
 							</Stack>
 						)
 					)}
