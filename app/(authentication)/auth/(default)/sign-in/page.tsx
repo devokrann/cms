@@ -12,6 +12,7 @@ import FormAuthSignIn from "@/partials/forms/auth/SignIn";
 import Brand from "@/components/Brand";
 
 import { auth } from "@/auth";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Sign In" };
 
@@ -25,7 +26,9 @@ export default async function SignIn() {
 			<LayoutSection padded containerized={"xs"}>
 				<Stack gap={40}>
 					<Group justify="center">
-						<Brand height={32} />
+						<Link href={"/"}>
+							<Brand height={32} />
+						</Link>
 					</Group>
 
 					<FormAuthSignIn />

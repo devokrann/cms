@@ -65,7 +65,7 @@ export default async function App({
 						<SessionProvider session={session}>{children}</SessionProvider>
 					</ModalsProvider>
 
-					<Notifications limit={3} />
+					<Notifications limit={3} position="top-center" />
 					<AffixTheme />
 				</MantineProvider>
 

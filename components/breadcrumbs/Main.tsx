@@ -26,10 +26,10 @@ export default function Main({ data }: { data: typeLink[] }) {
 			{data.map(item => (
 				<Anchor
 					key={item.link}
-					component={Link}
-					href={item.link}
 					c={active(item) ? "pri" : undefined}
 					className={classes.link}
+					component={Link}
+					href={item.link}
 				>
 					{item.label}
 				</Anchor>

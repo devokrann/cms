@@ -1,0 +1,10 @@
+.overlay {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: var(--mantine-spacing-md);
+	align-items: center;
+	justify-content: center;
+	color: var(--mantine-color-text);
+	background-color: var(--mantine-color-body);
+}

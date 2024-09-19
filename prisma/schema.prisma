@@ -21,8 +21,8 @@ datasource db {
 
 enum Role {
   USER
-  ADMIN
-  DEV
+  ADMINISTRATOR
+  DEVELOPER
 }
 
 enum Status {
@@ -58,6 +58,7 @@ model Profile {
   firstName String?  @map(name: "first_name")
   lastName  String?  @map(name: "last_name")
   bio       String?
+  phone     String?
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
   user      User     @relation(fields: [userId], references: [id])
@@ -69,9 +70,9 @@ model Profile {
 // app models
 
 model Post {
-  title       String
-  description String
-  published   Boolean @default(false)
+  title     String
+  content   String
+  published Boolean @default(false)
 
   id        String   @id @default(cuid())
   createdAt DateTime @default(now()) @map(name: "created_at")

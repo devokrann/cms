@@ -37,6 +37,7 @@ import { typeSignUp } from "@/types/form";
 import { signIn as authSignIn } from "next-auth/react";
 import { millToMinSec } from "@/handlers/parsers/number";
 import Brand from "@/components/Brand";
+import Link from "next/link";
 
 export default function SignUp({ userEmail }: { userEmail?: string }) {
 	const [submitted, setSubmitted] = useState(false);
@@ -391,7 +392,9 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 						<LayoutSection padded containerized={"xs"}>
 							<Stack gap={40}>
 								<Group justify="center">
-									<Brand height={32} />
+									<Link href={"/"}>
+										<Brand height={32} />
+									</Link>
 								</Group>
 
 								<Box
@@ -483,7 +486,9 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 						<LayoutSection padded containerized={"xs"}>
 							<Stack gap={40}>
 								<Group justify="center">
-									<Brand height={32} />
+									<Link href={"/"}>
+										<Brand height={32} />
+									</Link>
 								</Group>
 
 								<Box
