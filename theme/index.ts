@@ -10,6 +10,7 @@ import {
 	Badge,
 	Button,
 	Container,
+	MultiSelect,
 	Notification,
 	PasswordInput,
 	Select,
@@ -97,6 +98,7 @@ const projectName = createTheme({
 	components: {
 		PasswordInput: PasswordInput.extend(input.password),
 		Select: Select.extend(input.select),
+		MultiSelect: MultiSelect.extend(input.select),
 		TextInput: TextInput.extend(input.text),
 		Textarea: Textarea.extend(input.textarea),
 		Title: Title.extend(title),

@@ -5,13 +5,16 @@ import LayoutSection from "@/layouts/Section";
 import { Metadata } from "next";
 import { Button, Card, Divider, Group, Stack, Title } from "@mantine/core";
 import HeroMain from "@/layouts/heros/Main";
-import TableUsers from "@/components/tables/Users";
-import InputSearchUser from "@/components/input/search/User";
-import InputSelectUser from "@/components/input/select/User";
 
-export const metadata: Metadata = { title: "Users" };
+import InputSearchBlog from "@/components/input/search/Blog";
+import InputSelectBlog from "@/components/input/select/Blog";
+import TableBlog from "@/components/tables/Blog";
+import { IconPlus } from "@tabler/icons-react";
+import Link from "next/link";
 
-export default function Users() {
+export const metadata: Metadata = { title: "Posts" };
+
+export default function Posts() {
 	return (
 		<LayoutPage my={"xl"}>
 			<HeroMain />
@@ -19,8 +22,12 @@ export default function Users() {
 			<LayoutSection margined="xl" containerized="responsive">
 				<Group justify="space-between">
 					<Title order={1} fz={"xl"}>
-						Users
+						Blog Posts
 					</Title>
+
+					<Button leftSection={<IconPlus size={16} stroke={1.5} />} component={Link} href={"/create/post"}>
+						New Post
+					</Button>
 				</Group>
 			</LayoutSection>
 
@@ -28,10 +35,10 @@ export default function Users() {
 				<Stack>
 					<Card withBorder shadow="xs" padding={"xs"}>
 						<Group justify="space-between">
-							<InputSearchUser />
+							<InputSearchBlog />
 
 							<Group gap={"xs"}>
-								<InputSelectUser />
+								<InputSelectBlog />
 								<Divider orientation="vertical" />
 								<Button size="xs">Clear Filters</Button>
 							</Group>
@@ -39,7 +46,7 @@ export default function Users() {
 					</Card>
 
 					<Card withBorder padding={0} shadow="xs" c={"inherit"}>
-						<TableUsers />
+						<TableBlog />
 					</Card>
 				</Stack>
 			</LayoutSection>

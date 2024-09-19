@@ -14,6 +14,7 @@ import Brand from "@/components/Brand";
 import { auth } from "@/auth";
 
 import { typeParams } from "../../../../layout";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Reset Password" };
 
@@ -27,7 +28,9 @@ export default async function Reset({ params }: { params: typeParams }) {
 			<LayoutSection padded containerized={"xs"}>
 				<Stack gap={40}>
 					<Group justify="center">
-						<Brand height={32} />
+						<Link href={"/"}>
+							<Brand height={32} />
+						</Link>
 					</Group>
 
 					<Card withBorder>
