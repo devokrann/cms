@@ -89,7 +89,7 @@ export async function POST(req: Request) {
 			}
 		}
 	} catch (error) {
-		console.error("x-> Error emailing password reset link:", (error as Error).message);
+		console.error("x-> Error emailing password reset link:", error);
 		return Response.error();
 	}
 }
@@ -123,7 +123,7 @@ const createOtlRecord = async (fields: { email: string; otl: string }) => {
 				},
 			}));
 	} catch (error) {
-		console.error("x-> Error creating otl record:", (error as Error).message);
+		console.error("x-> Error creating otl record:", error);
 		throw error;
 	}
 };

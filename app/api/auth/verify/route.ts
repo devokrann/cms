@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 			}
 		}
 	} catch (error) {
-		console.error("x-> Error signing up:", (error as Error).message);
+		console.error("x-> Error signing up:", error);
 		return Response.error();
 	}
 }

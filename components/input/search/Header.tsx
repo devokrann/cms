@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { TextInput } from "@mantine/core";
+import { Text, TextInput } from "@mantine/core";
 import { Spotlight, SpotlightActionData, spotlight } from "@mantine/spotlight";
 import { IconBlockquote, IconDashboard, IconSearch, IconUser } from "@tabler/icons-react";
 
@@ -12,11 +12,15 @@ export default function Header() {
 			<TextInput
 				onClick={spotlight.open}
 				leftSection={<IconSearch size={16} stroke={1.5} />}
-				placeholder="Search"
 				styles={{
 					input: { paddingLeft: "var(--mantine-spacing-xl)" },
 				}}
-			/>
+				component={"button"}
+			>
+				<Text component="span" inherit fz={"xs"} c={"dimmed"}>
+					Search all...
+				</Text>
+			</TextInput>
 
 			<Spotlight
 				actions={actions}
@@ -24,7 +28,7 @@ export default function Header() {
 				highlightQuery
 				searchProps={{
 					leftSection: <IconSearch size={20} stroke={1.5} />,
-					placeholder: "Search",
+					placeholder: "Search all...",
 				}}
 			/>
 		</>
