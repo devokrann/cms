@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 			}
 		}
 	} catch (error) {
-		console.error("x-> Error signing up:", (error as Error).message);
+		console.error("x-> Error signing up:", error);
 		return Response.error();
 	}
 }
@@ -65,7 +65,7 @@ const createUser = async (fields: { email: string; password?: string }) => {
 			},
 		});
 	} catch (error) {
-		console.error("x-> Error creating user record:", (error as Error).message);
+		console.error("x-> Error creating user record:", error);
 		throw error;
 	}
 };
@@ -85,7 +85,7 @@ const createOtp = async (fields: { email: string; otp: string }) => {
 			},
 		});
 	} catch (error) {
-		console.error("x-> Error creating otp record:", (error as Error).message);
+		console.error("x-> Error creating otp record:", error);
 		throw error;
 	}
 };

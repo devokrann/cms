@@ -11,10 +11,10 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import email from "@/libraries/validators/special/email";
 
 import { capitalizeWord, capitalizeWords } from "@/handlers/parsers/string";
-import { enumUserRole } from "@/types/user";
+import { enumUserRole } from "@/types/enums";
 import password from "@/libraries/validators/special/password";
 import compare from "@/libraries/validators/special/compare";
-import { enumRequest } from "@/types/request";
+import { enumRequest } from "@/types/enums";
 
 interface typeFormUser {
 	name: string;

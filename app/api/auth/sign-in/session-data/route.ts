@@ -75,7 +75,7 @@ const createSession = async (fields: {
 			},
 		});
 	} catch (error) {
-		console.error("x-> Error creating user session record:", (error as Error).message);
+		console.error("x-> Error creating user session record:", error);
 		throw error;
 	}
 };

@@ -11,7 +11,7 @@ export async function GET(req: Request) {
 			return Response.json({ users: userRecords });
 		}
 	} catch (error) {
-		console.error("x-> Error getting user:", (error as Error).message);
+		console.error("x-> Error getting user:", error);
 		return Response.error();
 	}
 }

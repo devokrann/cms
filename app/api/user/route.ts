@@ -21,7 +21,26 @@ export async function POST(req: Request) {
 			return Response.json({ user: { exists: true } });
 		}
 	} catch (error) {
-		console.error("x-> Error creating user:", (error as Error).message);
+		console.error("x-> Error creating user:", error);
+		return Response.error();
+	}
+}
+
+export async function DELETE(req: Request) {
+	try {
+		const userId = await req.json();
+
+		const userRecord = await prisma.user.findUnique({ where: { id: userId } });
+
+		if (!userRecord) {
+			return Response.json({ user: { exists: false } });
+		} else {
+			await deleteUser(userId);
+
+			return Response.json({ user: { exists: true } });
+		}
+	} catch (error) {
+		console.error("x-> Error deleting user:", error);
 		return Response.error();
 	}
 }
@@ -41,4 +60,20 @@ const createUser = async (fields: { email: string; role: Role; name?: string; ph
 		console.error("x-> Error creating user record:", (error as Error).message);
 		throw error;
 	}
+};
+
+const deleteUser = async (id: string) => {
+	// delete user and user-related records
+	await prisma.user.delete({
+		where: { id },
+		include: {
+			profile: true,
+			accounts: true,
+			sessions: true,
+			authenticator: true,
+			otps: true,
+			otls: true,
+			posts: true,
+		},
+	});
 };

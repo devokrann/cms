@@ -1,16 +1,5 @@
 import { typeDatabaseFields } from "./database";
 
-export enum enumUserRole {
-	USER = "USER",
-	ADMIN = "ADMININSTRATOR",
-	DEV = "DEVELOPER",
-}
-
-export enum enumUserStatus {
-	ACTIVE = "ACTIVE",
-	SUSPENDED = "SUSPENDED",
-}
-
 export interface typeUser extends typeDatabaseFields {
 	name?: string;
 	email: string;

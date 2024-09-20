@@ -48,16 +48,16 @@ export async function POST(req: Request, { params }: { params: typePasswordReset
 						});
 					}
 				} catch (error) {
-					console.error(`x-> Error updating password record:`, (error as Error).message);
+					console.error(`x-> Error updating password record:`, error);
 					return Response.error();
 				}
 			} catch (error) {
-				console.error(`x-> Could not verify token:`, (error as Error).message);
+				console.error(`x-> Could not verify token:`, error);
 				return Response.json({ user: { exists: true }, token: { valid: false } });
 			}
 		}
 	} catch (error) {
-		console.error("x-> Error resetting password:", (error as Error).message);
+		console.error("x-> Error resetting password:", error);
 		return Response.error();
 	}
 }

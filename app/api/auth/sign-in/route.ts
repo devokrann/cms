@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 			}
 		}
 	} catch (error) {
-		console.error("x-> Error signing in:", (error as Error).message);
+		console.error("x-> Error signing in:", error);
 		return Response.error();
 	}
 }

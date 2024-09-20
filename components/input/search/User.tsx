@@ -7,17 +7,20 @@ import {
 	ComboboxChevron,
 	ComboboxDropdown,
 	ComboboxEmpty,
+	ComboboxFooter,
+	ComboboxGroup,
 	ComboboxOption,
 	ComboboxOptions,
 	ComboboxTarget,
 	Group,
 	InputBase,
-	InputPlaceholder,
 	Loader,
+	ScrollAreaAutosize,
+	Text,
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { enumRequest } from "@/types/request";
+import { enumRequest } from "@/types/enums";
 import { typeUser } from "@/types/user";
 
 export default function User() {
@@ -39,8 +42,30 @@ export default function User() {
 		},
 	});
 
-	const options = data.map(item => (
-		<ComboboxOption value={item.email} key={item.email}>
+	const [search, setSearch] = useState("");
+
+	const shouldFilterOptionsEmail = data.every(item => item.email !== search);
+
+	const filteredOptionsEmail = shouldFilterOptionsEmail
+		? data.filter(item => item.email.includes(search.trim()))
+		: data;
+
+	const optionsEmail = filteredOptionsEmail.map(item => (
+		<ComboboxOption key={item.email} value={item.email}>
+			{item.email}
+		</ComboboxOption>
+	));
+
+	const dataNames = data.filter(i => i.name);
+
+	const shouldFilterOptionsName = dataNames.every(item => item.name !== search);
+
+	const filteredOptionsName = shouldFilterOptionsName
+		? dataNames.filter(item => item.name?.toLowerCase()?.includes(search.trim().toLowerCase()))
+		: dataNames;
+
+	const optionsName = filteredOptionsName.map(item => (
+		<ComboboxOption key={item.email} value={item.name!}>
 			{item.name}
 		</ComboboxOption>
 	));
@@ -51,6 +76,7 @@ export default function User() {
 			withinPortal={false}
 			onOptionSubmit={val => {
 				setValue(val);
+				setSearch(val);
 				combobox.closeDropdown();
 			}}
 		>
@@ -58,29 +84,65 @@ export default function User() {
 				<InputBase
 					size="xs"
 					w={240}
-					component="button"
-					type="button"
+					value={search}
+					onChange={event => {
+						combobox.openDropdown();
+						combobox.updateSelectedOptionIndex();
+						setSearch(event.currentTarget.value);
+					}}
+					onClick={() => combobox.openDropdown()}
+					onFocus={() => combobox.openDropdown()}
+					onBlur={() => {
+						combobox.closeDropdown();
+						setSearch(value || "");
+					}}
 					pointer
 					leftSection={<IconSearch size={16} stroke={1.5} />}
 					rightSection={<ComboboxChevron />}
-					onClick={() => combobox.toggleDropdown()}
+					placeholder="Search users..."
 					rightSectionPointerEvents="none"
-				>
-					{value || <InputPlaceholder>Search users...</InputPlaceholder>}
-				</InputBase>
+				/>
 			</ComboboxTarget>
 
 			<ComboboxDropdown>
 				<ComboboxOptions>
-					{loading ? (
-						<ComboboxEmpty>
-							<Group justify="center">
-								<Loader type="dots" size={18} />
-							</Group>
-						</ComboboxEmpty>
-					) : (
-						options
-					)}
+					<ScrollAreaAutosize mah={200} offsetScrollbars scrollbarSize={8}>
+						<ComboboxGroup label="Search by Name">
+							{loading ? (
+								<ComboboxEmpty>
+									<Group justify="center">
+										<Loader type="dots" size={18} />
+									</Group>
+								</ComboboxEmpty>
+							) : optionsName.length > 0 ? (
+								optionsName
+							) : (
+								<Combobox.Empty>
+									<Text component="span" inherit fz={"xs"}>
+										Nothing found...
+									</Text>
+								</Combobox.Empty>
+							)}
+						</ComboboxGroup>
+
+						<ComboboxGroup label="Search by Email">
+							{loading ? (
+								<ComboboxEmpty>
+									<Group justify="center">
+										<Loader type="dots" size={18} />
+									</Group>
+								</ComboboxEmpty>
+							) : optionsEmail.length > 0 ? (
+								optionsEmail
+							) : (
+								<Combobox.Empty>
+									<Text component="span" inherit fz={"xs"}>
+										Nothing found...
+									</Text>
+								</Combobox.Empty>
+							)}
+						</ComboboxGroup>
+					</ScrollAreaAutosize>
 				</ComboboxOptions>
 			</ComboboxDropdown>
 		</Combobox>
