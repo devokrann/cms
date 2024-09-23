@@ -18,7 +18,7 @@ export default function LayoutDashboard({
 	return (
 		<LayoutBody
 			header={<HeaderMain />}
-			aside={{ left: { component: <AsideLeft />, withBorder: true }, gap: "md" }}
+			aside={{ left: { component: <AsideLeft />, withBorder: true, width: { md: 25, lg: 17.5 } }, gap: "md" }}
 			footer={<FooterMain />}
 		>
 			<main>{children}</main>

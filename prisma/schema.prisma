@@ -58,7 +58,11 @@ model Profile {
   firstName String?  @map(name: "first_name")
   lastName  String?  @map(name: "last_name")
   bio       String?
+  address   String?
   phone     String?
+  city      String?
+  state     String?
+  country   String?
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -70,9 +74,8 @@ model Profile {
 // app models
 
 model Post {
-  title     String
-  content   String
-  published Boolean @default(false)
+  title   String
+  content String
 
   id        String   @id @default(cuid())
   createdAt DateTime @default(now()) @map(name: "created_at")
@@ -97,6 +100,7 @@ model Category {
 
   posts Post[]
 
+  @@unique([title])
   @@map(name: "categories")
 }
 
@@ -109,6 +113,7 @@ model Tag {
 
   posts Post[]
 
+  @@unique([title])
   @@map(name: "tags")
 }
 

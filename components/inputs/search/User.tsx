@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
 	Combobox,
@@ -20,10 +20,10 @@ import {
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { enumRequest } from "@/types/enums";
 import { typeUser } from "@/types/user";
+import { getUsers } from "@/handlers/database/users";
 
-export default function User() {
+export default function User({ hoistChange, label, placeholder, error, required, size }: any) {
 	const [value, setValue] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState<typeUser[]>([]);
@@ -51,7 +51,7 @@ export default function User() {
 		: data;
 
 	const optionsEmail = filteredOptionsEmail.map(item => (
-		<ComboboxOption key={item.email} value={item.email}>
+		<ComboboxOption key={item.id} value={item.email}>
 			{item.email}
 		</ComboboxOption>
 	));
@@ -65,7 +65,7 @@ export default function User() {
 		: dataNames;
 
 	const optionsName = filteredOptionsName.map(item => (
-		<ComboboxOption key={item.email} value={item.name!}>
+		<ComboboxOption key={item.id} value={item.name!}>
 			{item.name}
 		</ComboboxOption>
 	));
@@ -75,20 +75,25 @@ export default function User() {
 			store={combobox}
 			withinPortal={false}
 			onOptionSubmit={val => {
+				combobox.closeDropdown();
 				setValue(val);
 				setSearch(val);
-				combobox.closeDropdown();
+				hoistChange && hoistChange(data.find(u => u.email == val || u.name == val)?.id);
 			}}
 		>
 			<ComboboxTarget>
 				<InputBase
-					size="xs"
+					size={size ? size : undefined}
 					w={240}
 					value={search}
 					onChange={event => {
 						combobox.openDropdown();
 						combobox.updateSelectedOptionIndex();
 						setSearch(event.currentTarget.value);
+						hoistChange &&
+							hoistChange(
+								data.find(u => u.email == event.target.value || u.name == event.target.value)?.id
+							);
 					}}
 					onClick={() => combobox.openDropdown()}
 					onFocus={() => combobox.openDropdown()}
@@ -97,10 +102,13 @@ export default function User() {
 						setSearch(value || "");
 					}}
 					pointer
+					required={required}
+					label={label}
+					placeholder={placeholder}
 					leftSection={<IconSearch size={16} stroke={1.5} />}
 					rightSection={<ComboboxChevron />}
-					placeholder="Search users..."
 					rightSectionPointerEvents="none"
+					error={error}
 				/>
 			</ComboboxTarget>
 
@@ -148,20 +156,6 @@ export default function User() {
 		</Combobox>
 	);
 }
-
-const getUsers = async () => {
-	const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/users", {
-		method: enumRequest.GET,
-		headers: {
-			"Content-Type": "application/json",
-			Accept: "application/json",
-		},
-	});
-
-	const res = await response.json();
-
-	return res.users;
-};
 
 function getAsyncData() {
 	return new Promise<typeUser[]>(resolve => {

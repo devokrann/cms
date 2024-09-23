@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import {
 	ActionIcon,
+	Anchor,
 	Badge,
 	Button,
 	Card,
@@ -27,14 +28,15 @@ import {
 } from "@mantine/core";
 
 import classes from "./Users.module.scss";
-import { Icon, IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
+import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
 import { typeUser } from "@/types/user";
 import { enumSort, enumUserStatus } from "@/types/enums";
-import { enumRequest } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import ModalUserDelete from "../modals/user/Delete";
-import InputSearchUser from "@/components/input/search/User";
+import InputSearchUser from "@/components/inputs/search/User";
 import { capitalizeWord } from "@/handlers/parsers/string";
+import Link from "next/link";
+import { getUsers } from "@/handlers/database/users";
 
 interface typeSortObject {
 	order: enumSort;
@@ -53,22 +55,12 @@ export default function Users() {
 	const [users, setUsers] = useState<typeUser[] | null>(null);
 
 	useEffect(() => {
-		const getUsers = async () => {
-			const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/users", {
-				method: enumRequest.GET,
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-			});
-
-			const res = await response.json();
-
-			// asign users
-			setUsers(res.users);
+		const fetchUsers = async () => {
+			const result = await getUsers();
+			setUsers(result);
 		};
 
-		getUsers();
+		fetchUsers();
 	}, []);
 
 	// paginate logic
@@ -136,13 +128,10 @@ export default function Users() {
 			case enumTableUsers.NAME:
 				setNameOrder(prevNameOrder => {
 					if (prevNameOrder.order == enumSort.DEFAULT || prevNameOrder.order == enumSort.DESCENDING) {
-						// Create a shallow copy of items and sort by 'name' ascending
-						// setItems(prevItems => [...prevItems].sort((a, b) => a.name.localeCompare(b.name)));
-
-						setItems(prevItems => {
+						setUsers(prevUsers => {
 							// Split the array into two: one with valid names and one with null names
-							const validNames = [...prevItems].filter(item => item.name);
-							const nullNames = [...prevItems].filter(item => !item.name);
+							const validNames = [...prevUsers!].filter(item => item.name);
+							const nullNames = [...prevUsers!].filter(item => !item.name);
 
 							// Sort the array with valid names
 							validNames.sort((a, b) => a.name!.localeCompare(b.name!));
@@ -156,10 +145,10 @@ export default function Users() {
 							button: getSortButtons(enumTableUsers.NAME).ascending,
 						};
 					} else {
-						setItems(prevItems => {
+						setUsers(prevUsers => {
 							// Split the array into two: one with valid names and one with null names
-							const validNames = [...prevItems].filter(item => item.name);
-							const nullNames = [...prevItems].filter(item => !item.name);
+							const validNames = [...prevUsers!].filter(item => item.name);
+							const nullNames = [...prevUsers!].filter(item => !item.name);
 
 							// Sort the array with valid names
 							validNames.sort((a, b) => a.name!.localeCompare(b.name!)).reverse();
@@ -180,7 +169,7 @@ export default function Users() {
 				setEmailOrder(prevEmailOrder => {
 					if (prevEmailOrder.order == enumSort.DEFAULT || prevEmailOrder.order == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'email' ascending
-						setItems(prevItems => [...prevItems].sort((a, b) => a.email.localeCompare(b.email)));
+						setUsers(prevUsers => [...prevUsers!].sort((a, b) => a.email.localeCompare(b.email)));
 
 						return {
 							order: enumSort.ASCENDING,
@@ -188,7 +177,7 @@ export default function Users() {
 						};
 					} else {
 						// Create a shallow copy of items and sort by 'email' descending
-						setItems(prevItems => [...prevItems].sort((a, b) => a.email.localeCompare(b.email)).reverse());
+						setUsers(prevUsers => [...prevUsers!].sort((a, b) => a.email.localeCompare(b.email)).reverse());
 
 						return {
 							order: enumSort.DESCENDING,
@@ -202,7 +191,7 @@ export default function Users() {
 				setRoleOrder(prevRoleOrder => {
 					if (prevRoleOrder.order == enumSort.DEFAULT || prevRoleOrder.order == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'role' ascending
-						setItems(prevItems => [...prevItems].sort((a, b) => a.role.localeCompare(b.role)));
+						setUsers(prevUsers => [...prevUsers!].sort((a, b) => a.role.localeCompare(b.role)));
 
 						return {
 							order: enumSort.ASCENDING,
@@ -210,7 +199,7 @@ export default function Users() {
 						};
 					} else {
 						// Create a shallow copy of items and sort by 'role' descending
-						setItems(prevItems => [...prevItems].sort((a, b) => a.role.localeCompare(b.role)).reverse());
+						setUsers(prevUsers => [...prevUsers!].sort((a, b) => a.role.localeCompare(b.role)).reverse());
 
 						return {
 							order: enumSort.DESCENDING,
@@ -224,7 +213,7 @@ export default function Users() {
 				setStatusOrder(prevStatusOrder => {
 					if (prevStatusOrder.order == enumSort.DEFAULT || prevStatusOrder.order == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'status' ascending
-						setItems(prevItems => [...prevItems].sort((a, b) => a.status.localeCompare(b.status)));
+						setUsers(prevUsers => [...prevUsers!].sort((a, b) => a.status.localeCompare(b.status)));
 
 						return {
 							order: enumSort.ASCENDING,
@@ -232,8 +221,8 @@ export default function Users() {
 						};
 					} else {
 						// Create a shallow copy of items and sort by 'status' descending
-						setItems(prevItems =>
-							[...prevItems].sort((a, b) => a.status.localeCompare(b.status)).reverse()
+						setUsers(prevUsers =>
+							[...prevUsers!].sort((a, b) => a.status.localeCompare(b.status)).reverse()
 						);
 
 						return {
@@ -248,8 +237,8 @@ export default function Users() {
 				setCreatedOrder(prevCreatedOrder => {
 					if (prevCreatedOrder.order == enumSort.DEFAULT || prevCreatedOrder.order == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'created at' ascending
-						setItems(prevItems =>
-							[...prevItems].sort((a, b) => {
+						setUsers(prevUsers =>
+							[...prevUsers!].sort((a, b) => {
 								const dateA = new Date(a.createdAt!); // Convert the string to a Date object
 								const dateB = new Date(b.createdAt!);
 								return dateA.getTime() - dateB.getTime(); // Sort by time value
@@ -262,8 +251,8 @@ export default function Users() {
 						};
 					} else {
 						// Create a shallow copy of items and sort by 'created at' descending
-						setItems(prevItems =>
-							[...prevItems].sort((a, b) => {
+						setUsers(prevUsers =>
+							[...prevUsers!].sort((a, b) => {
 								const dateA = new Date(a.createdAt!); // Convert the string to a Date object
 								const dateB = new Date(b.createdAt!);
 								return dateB.getTime() - dateA.getTime(); // Sort by time value
@@ -283,9 +272,19 @@ export default function Users() {
 	const [selectedRows, setSelectedRows] = useState<string[]>([]);
 	const active = selectedRows.length > 0;
 
+	const tableWidths = {
+		check: { md: "5%", lg: "5%" },
+		name: { md: "25%", lg: "20%" },
+		email: { md: "25%", lg: "25%" },
+		role: { md: "10%", lg: "15%" },
+		status: { md: "15%", lg: "15%" },
+		created: { md: "15%", lg: "15%" },
+		delete: { md: "5%", lg: "5%" },
+	};
+
 	const rows = items?.map(user => (
 		<TableTr key={user.email} bg={selectedRows.includes(user.email) ? "var(--mantine-color-gray-1)" : undefined}>
-			<Table.Td>
+			<TableTd w={tableWidths.check}>
 				<Center>
 					<Checkbox
 						size="xs"
@@ -300,18 +299,24 @@ export default function Users() {
 						}
 					/>
 				</Center>
-			</Table.Td>
+			</TableTd>
 
-			<TableTd>{user.name}</TableTd>
-			<TableTd>{user.email}</TableTd>
-			<TableTd>{capitalizeWord(user.role)}</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.name}>{user.name}</TableTd>
+			<TableTd w={tableWidths.email}>
+				<Anchor inherit component={Link} href={`/listings/users/${user.id}`} underline="always">
+					{user.email}
+				</Anchor>
+			</TableTd>
+			<TableTd w={tableWidths.role} display={{ base: "none", lg: "table-cell" }}>
+				{capitalizeWord(user.role)}
+			</TableTd>
+			<TableTd w={tableWidths.status}>
 				<Badge size="xs" variant="light" color={getStatusColor(user.status as enumUserStatus)}>
 					{user.status}
 				</Badge>
 			</TableTd>
-			<TableTd>{parseDateYmd(user.createdAt!)}</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.created}>{parseDateYmd(user.createdAt!)}</TableTd>
+			<TableTd w={tableWidths.delete}>
 				<Center>
 					<ModalUserDelete data={user}>
 						<ActionIcon color="red" variant="light">
@@ -325,10 +330,8 @@ export default function Users() {
 
 	const skeletonRow = (
 		<TableTr>
-			<TableTd />
-
 			<TableTd>
-				<Skeleton h={12} w={"80%"} my={4} />
+				<Skeleton h={16} w={16} my={4} />
 			</TableTd>
 			<TableTd>
 				<Skeleton h={12} w={"80%"} my={4} />
@@ -341,6 +344,9 @@ export default function Users() {
 			</TableTd>
 			<TableTd>
 				<Skeleton h={12} w={"80%"} my={4} />
+			</TableTd>
+			<TableTd>
+				<Skeleton h={24} w={24} my={4} />
 			</TableTd>
 		</TableTr>
 	);
@@ -350,31 +356,51 @@ export default function Users() {
 			<Card withBorder shadow="xs" padding={"xs"} style={{ overflow: "unset" }}>
 				<Stack>
 					<Group justify="space-between">
-						<InputSearchUser />
+						{!users ? (
+							<Skeleton h={28} w={240} />
+						) : (
+							<InputSearchUser size={"xs"} placeholder={"Search users..."} />
+						)}
 
 						<Group gap={"xs"}>
-							{/* <InputSelectUser /> */}
-							<Select
-								size="xs"
-								w={120}
-								defaultValue={divisorOptions[0].value}
-								placeholder={divisorOptions[0].label}
-								data={divisorOptions}
-								value={divisor}
-								onChange={setDivisor}
-							/>
+							{!users ? (
+								<Skeleton h={28} w={120} />
+							) : (
+								<Select
+									size="xs"
+									w={120}
+									defaultValue={divisorOptions[0].value}
+									placeholder={divisorOptions[0].label}
+									data={divisorOptions}
+									value={divisor}
+									onChange={setDivisor}
+									allowDeselect={false}
+									withCheckIcon={false}
+								/>
+							)}
+
 							<Divider orientation="vertical" />
-							<Button size="xs">Clear Filters</Button>
+
+							{!users ? <Skeleton h={28} w={96} /> : <Button size="xs">Clear Filters</Button>}
 						</Group>
 					</Group>
 
 					<Group>
-						<Button size="xs" disabled={!active} color="red" variant="light">
-							Deactivate ({selectedRows.length})
-						</Button>
-						<Button size="xs" disabled={!active} color="green" variant="light">
-							Activate ({selectedRows.length})
-						</Button>
+						{!users ? (
+							<Skeleton h={28} w={96} />
+						) : (
+							<Button size="xs" disabled={!active} color="red" variant="light">
+								Deactivate ({selectedRows.length})
+							</Button>
+						)}
+
+						{!users ? (
+							<Skeleton h={28} w={96} />
+						) : (
+							<Button size="xs" disabled={!active} color="green" variant="light">
+								Activate ({selectedRows.length})
+							</Button>
+						)}
 					</Group>
 				</Stack>
 			</Card>
@@ -387,24 +413,28 @@ export default function Users() {
 						caption: classes.caption,
 					}}
 				>
-					<TableThead tt={"uppercase"}>
+					<TableThead tt={"uppercase"} fz={"xs"}>
 						<TableTr>
-							<TableTh>
+							<TableTh w={tableWidths.check}>
 								<Center>
-									<Checkbox
-										size="xs"
-										aria-label="Select row"
-										checked={users?.length != 0 && selectedRows.length == users?.length}
-										onChange={event =>
-											setSelectedRows(
-												event.currentTarget.checked ? users?.map(u => u.email)! : []
-											)
-										}
-									/>
+									{!users ? (
+										<Skeleton h={16} w={16} />
+									) : (
+										<Checkbox
+											size="xs"
+											aria-label="Select row"
+											checked={users?.length != 0 && selectedRows.length == users?.length}
+											onChange={event =>
+												setSelectedRows(
+													event.currentTarget.checked ? users?.map(u => u.email)! : []
+												)
+											}
+										/>
+									)}
 								</Center>
 							</TableTh>
 
-							<TableTh>
+							<TableTh w={tableWidths.name}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
 										Name
@@ -413,7 +443,7 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh>
+							<TableTh w={tableWidths.email}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
 										Email
@@ -422,7 +452,7 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh>
+							<TableTh w={tableWidths.role} display={{ base: "none", lg: "table-cell" }}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
 										Role
@@ -431,7 +461,7 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh>
+							<TableTh w={tableWidths.status}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
 										Status
@@ -440,16 +470,16 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh>
+							<TableTh w={tableWidths.created}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
-										Created On
+										Created
 									</Text>
 									{createdOrder?.button}
 								</Group>
 							</TableTh>
 
-							<TableTh />
+							<TableTh w={tableWidths.delete} />
 						</TableTr>
 					</TableThead>
 
@@ -457,10 +487,14 @@ export default function Users() {
 
 					<TableCaption>
 						<Group justify="space-between">
-							<Text component="span" inherit>
-								Showing <NumberFormatter thousandSeparator value={rows.length} /> of{" "}
-								<NumberFormatter thousandSeparator value={users?.length} /> users
-							</Text>
+							{!users ? (
+								<Skeleton h={16} w={160} />
+							) : (
+								<Text component="span" inherit>
+									Showing <NumberFormatter thousandSeparator value={rows.length} /> of{" "}
+									<NumberFormatter thousandSeparator value={users?.length} /> users
+								</Text>
+							)}
 
 							{!users ? (
 								<Group gap={"xs"}>

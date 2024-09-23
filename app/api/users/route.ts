@@ -6,9 +6,9 @@ export async function GET(req: Request) {
 		const userRecords = await prisma.user.findMany();
 
 		if (!userRecords) {
-			return Response.json({ users: null });
+			return Response.json(null);
 		} else {
-			return Response.json({ users: userRecords });
+			return Response.json(userRecords);
 		}
 	} catch (error) {
 		console.error("x-> Error getting user:", error);
