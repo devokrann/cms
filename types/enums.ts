@@ -13,8 +13,8 @@ export enum enumRequest {
 
 export enum enumUserRole {
 	USER = "USER",
-	ADMIN = "ADMININSTRATOR",
-	DEV = "DEVELOPER",
+	ADMINISTRATOR = "ADMINISTRATOR",
+	DEVELOPER = "DEVELOPER",
 }
 
 export enum enumUserStatus {

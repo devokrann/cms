@@ -6,8 +6,7 @@ import { Metadata } from "next";
 import { Button, Card, Divider, Group, Stack, Title } from "@mantine/core";
 import HeroMain from "@/layouts/heros/Main";
 
-import InputSearchBlog from "@/components/input/search/Blog";
-import InputSelectBlog from "@/components/input/select/Blog";
+import InputSearchBlog from "@/components/inputs/search/Blog";
 import TableBlog from "@/components/tables/Blog";
 import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
@@ -38,7 +37,7 @@ export default function Posts() {
 							<InputSearchBlog />
 
 							<Group gap={"xs"}>
-								<InputSelectBlog />
+								{/* <InputShow /> */}
 								<Divider orientation="vertical" />
 								<Button size="xs">Clear Filters</Button>
 							</Group>

@@ -2,71 +2,82 @@
 
 import React, { useEffect, useState } from "react";
 
-import {
-	Box,
-	Button,
-	Card,
-	CardSection,
-	Center,
-	Divider,
-	Fieldset,
-	Grid,
-	GridCol,
-	Group,
-	MultiSelect,
-	PasswordInput,
-	Radio,
-	RadioGroup,
-	Select,
-	Stack,
-	Text,
-	TextInput,
-	Textarea,
-	Title,
-} from "@mantine/core";
+import { Box, Button, Fieldset, Grid, GridCol, Group, Stack, TextInput } from "@mantine/core";
 
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import { DateInput } from "@mantine/dates";
+
 import { hasLength, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-import { IconCheck, IconX, IconUpload, IconPhoto } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
-import { RichTextEditor, Link } from "@mantine/tiptap";
-import { useEditor } from "@tiptap/react";
-import Highlight from "@tiptap/extension-highlight";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align";
-import Placeholder from "@tiptap/extension-placeholder";
+import DropzonePost from "@/components/dropezones/Post";
+import { enumRequest } from "@/types/enums";
+import InputSearchUser from "@/components/inputs/search/User";
+import InputTagBlog from "@/components/inputs/tag/Blog";
+import InputContentBlog from "@/components/inputs/content/Blog";
+import InputCategoryBlog from "@/components/inputs/category/Blog";
 
-interface typeFormUser {
+interface typeFormPost {
 	title: string;
 	content: string;
-	published: string;
+	category: string;
+	createdAt: Date;
+
+	author: string;
+	tags: string[];
 }
 
 export default function Post() {
+	// Step 1: Manage the input value state
+	const [userId, setUserId] = useState<string>("");
+	const [postCategory, setPostCategory] = useState<string>("");
+	const [postTags, setPostTags] = useState<string[]>([]);
+	const [postContent, setPostContent] = useState<string>("");
+
+	// Step 2: Handle input change
+	const handleUserChange = (value: string) => {
+		setUserId(value);
+	};
+	const handleTagsChange = (value: string[]) => {
+		setPostTags(value);
+	};
+	const handleContentChange = (value: string) => {
+		setPostContent(value);
+	};
+	const handleCategoryChange = (value: string) => {
+		setPostCategory(value);
+	};
+
 	const [submitted, setSubmitted] = useState(false);
 
 	const form = useForm({
 		initialValues: {
 			title: "",
 			content: "",
-			published: "",
+			createdAt: new Date(),
+
+			author: "",
+			category: "",
+			tags: [""],
 		},
 
 		validate: {
-			title: hasLength({ min: 0, max: 64 }, "Between 2 and 64 characters"),
-			content: value => value.trim().length < 1 && "Please fill out this field",
-			published: hasLength({ min: 1, max: 24 }, "Please fill out this field"),
+			title: hasLength({ min: 2, max: 64 }, "Between 2 and 64 characters"),
+			author: value => userId.length < 1 && "Select an author",
+			tags: value => postTags.length < 1 && "Select or create some tags",
 		},
 	});
 
-	const parse = (rawData: typeFormUser) => {
+	const parse = (rawData: typeFormPost) => {
 		return {
 			title: rawData.title.trim(),
 			content: rawData.content.trim(),
-			published: rawData.published,
+			createdAt: rawData.createdAt,
+
+			author: rawData.author.trim(),
+			category: rawData.category.trim(),
+			tags: rawData.tags,
 		};
 	};
 
@@ -75,8 +86,8 @@ export default function Post() {
 			try {
 				setSubmitted(true);
 
-				await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/contact", {
-					method: "POST",
+				await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
+					method: enumRequest.POST,
 					body: JSON.stringify(parse(form.values)),
 					headers: {
 						"Content-Type": "application/json",
@@ -85,7 +96,7 @@ export default function Post() {
 				}).then(res => {
 					if (!res) {
 						notifications.show({
-							id: "form-user-create-failed-no-response",
+							id: "blog-post-create-failed-no-response",
 							icon: <IconX size={16} stroke={1.5} />,
 							autoClose: 5000,
 							title: "Server Unavailable",
@@ -94,18 +105,18 @@ export default function Post() {
 						});
 					} else {
 						notifications.show({
-							id: "form-user-create-success",
+							id: "blog-post-create-success",
 							icon: <IconCheck size={16} stroke={1.5} />,
 							autoClose: 5000,
-							title: "User Created",
-							message: `Post has been added`,
+							title: "Post Created",
+							message: `The post has been added`,
 							variant: "success",
 						});
 					}
 				});
 			} catch (error) {
 				notifications.show({
-					id: "form-user-create-failed",
+					id: "blog-post-create-failed",
 					icon: <IconX size={16} stroke={1.5} />,
 					autoClose: 5000,
 					title: "Submisstion Failed",
@@ -113,219 +124,112 @@ export default function Post() {
 					variant: "failed",
 				});
 			} finally {
-				form.reset();
+				// form.reset();
 				setSubmitted(false);
 			}
 		}
 	};
 
-	const [mounted, setMounted] = useState(false);
-
-	// Avoid running Tiptap during SSR
 	useEffect(() => {
-		setMounted(true);
-	}, []);
+		if (form.isDirty()) {
+			form.setValues({ ...form.values, author: userId });
+			form.validate();
+		}
+	}, [userId]);
 
-	// rich text editor
-	const content = "";
+	useEffect(() => {
+		if (form.isDirty()) {
+			form.setValues({ ...form.values, tags: postTags });
+			form.validate();
+		}
+	}, [postTags]);
 
-	const editor = useEditor({
-		extensions: [
-			StarterKit,
-			Underline,
-			Link,
-			Highlight,
-			TextAlign.configure({ types: ["heading", "paragraph"] }),
-			Placeholder.configure({ placeholder: "Add post content here..." }),
-		],
-		content,
+	useEffect(() => {
+		if (form.isDirty()) {
+			form.setValues({ ...form.values, content: postContent });
+			form.validate();
+		}
+	}, [postContent]);
 
-		// This avoids hydration mismatch by delaying initial render.
-		immediatelyRender: false,
-	});
-
-	// Render null during SSR and only load Tiptap after mounting.
-	if (!mounted || !editor) {
-		return null;
-	}
+	useEffect(() => {
+		if (form.isDirty()) {
+			form.setValues({ ...form.values, category: postCategory });
+			form.validate();
+		}
+	}, [postCategory]);
 
 	return (
 		<Box component="form" onSubmit={form.onSubmit(values => handleSubmit())} noValidate>
 			<Grid>
-				<GridCol span={{ base: 12, md: 8, lg: 6 }}>
-					<TextInput required label={"Title"} placeholder={"Post Title"} {...form.getInputProps("title")} />
-				</GridCol>
-
 				<GridCol span={{ base: 12, md: 8 }}>
-					<RichTextEditor editor={editor} styles={{ content: { minHeight: "50vh" } }}>
-						<RichTextEditor.Toolbar sticky stickyOffset={0}>
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.Bold />
-								<RichTextEditor.Italic />
-								<RichTextEditor.Underline />
-								<RichTextEditor.Strikethrough />
-								<RichTextEditor.ClearFormatting />
-								<RichTextEditor.Highlight />
-								<RichTextEditor.Code />
-							</RichTextEditor.ControlsGroup>
+					<Grid>
+						<GridCol span={12}>
+							<Fieldset legend="Post Details">
+								<Grid>
+									<GridCol span={12}>
+										<TextInput
+											required
+											label={"Title"}
+											placeholder={"Post Title"}
+											{...form.getInputProps("title")}
+										/>
+									</GridCol>
+									<GridCol span={{ base: 12, md: 6 }}>
+										<InputSearchUser
+											label={"Author"}
+											placeholder={"Post Author"}
+											hoistChange={handleUserChange}
+											{...form.getInputProps("author")}
+											required
+										/>
+									</GridCol>
+									<GridCol span={{ base: 12, md: 6 }}>
+										<DateInput
+											required
+											label={"Publication Date"}
+											placeholder={"Post Publication Date"}
+											{...form.getInputProps("createdAt")}
+										/>
+									</GridCol>
+								</Grid>
+							</Fieldset>
+						</GridCol>
 
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.H1 />
-								<RichTextEditor.H2 />
-								<RichTextEditor.H3 />
-								<RichTextEditor.H4 />
-							</RichTextEditor.ControlsGroup>
-
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.Blockquote />
-								<RichTextEditor.Hr />
-								<RichTextEditor.BulletList />
-								<RichTextEditor.OrderedList />
-								<RichTextEditor.Subscript />
-								<RichTextEditor.Superscript />
-							</RichTextEditor.ControlsGroup>
-
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.Link />
-								<RichTextEditor.Unlink />
-							</RichTextEditor.ControlsGroup>
-
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.AlignLeft />
-								<RichTextEditor.AlignCenter />
-								<RichTextEditor.AlignJustify />
-								<RichTextEditor.AlignRight />
-							</RichTextEditor.ControlsGroup>
-
-							<RichTextEditor.ControlsGroup>
-								<RichTextEditor.Undo />
-								<RichTextEditor.Redo />
-							</RichTextEditor.ControlsGroup>
-						</RichTextEditor.Toolbar>
-
-						<RichTextEditor.Content />
-					</RichTextEditor>
+						<GridCol span={12}>
+							<InputContentBlog hoistChange={handleContentChange} />
+						</GridCol>
+					</Grid>
 				</GridCol>
 
 				<GridCol span={{ base: 12, md: 4 }}>
-					<Grid pos={"sticky"} top={"var(--mantine-spacing-lg)"} gutter={0}>
-						<GridCol span={12}>
-							<Stack>
-								<Card withBorder>
-									<Stack gap={"xs"}>
-										<Title order={2} fz={"sm"}>
-											Post Image
-										</Title>
+					<Stack pos={"sticky"} top={"var(--mantine-spacing-lg)"}>
+						<Fieldset legend="Post Image">
+							<DropzonePost />
+						</Fieldset>
 
-										<Dropzone
-											onDrop={files => console.log("accepted files", files)}
-											onReject={files => console.log("rejected files", files)}
-											// maxSize={5 * 1024 ** 2}
-											accept={IMAGE_MIME_TYPE}
-											// {...props}
-										>
-											<Group justify="center" style={{ pointerEvents: "none" }}>
-												<Dropzone.Accept>
-													<IconUpload
-														size={24}
-														color={"var(--mantine-color-blue-6)"}
-														stroke={1.5}
-													/>
-												</Dropzone.Accept>
-
-												<Dropzone.Reject>
-													<IconX
-														size={24}
-														color={"var(--mantine-color-red-6)"}
-														stroke={1.5}
-													/>
-												</Dropzone.Reject>
-
-												<Dropzone.Idle>
-													<IconPhoto
-														size={24}
-														color={"var(--mantine-color-dimmed)"}
-														stroke={1.5}
-													/>
-												</Dropzone.Idle>
-
-												<Stack gap={"xs"}>
-													<Text size="sm" ta={"center"}>
-														Drag image here or click to select files
-													</Text>
-													<Text size="xs" c="dimmed" ta={"center"}>
-														Attach as many files as you like, each file should not exceed
-														5mb
-													</Text>
-												</Stack>
-											</Group>
-										</Dropzone>
-									</Stack>
-								</Card>
-
-								<Card withBorder c={"inherit"}>
-									<Stack>
-										<Stack gap={"xs"}>
-											<Title order={2} fz={"sm"}>
-												Status
-											</Title>
-
-											<RadioGroup defaultValue={"enabled"}>
-												<Stack>
-													<Radio value="enabled" label="Enabled" />
-													<Radio value="disabled" label="Disabled" />
-												</Stack>
-											</RadioGroup>
-										</Stack>
-
-										<CardSection>
-											<Divider />
-										</CardSection>
-
-										<Stack gap={"xs"}>
-											<Title order={2} fz={"sm"}>
-												Metadata
-											</Title>
-
-											<Select
-												required
-												label={"Category"}
-												placeholder={"Post Category"}
-												{...form.getInputProps("category")}
-												data={["caregory1"]}
-											/>
-
-											<MultiSelect
-												required
-												label="Tags"
-												placeholder="Post Tags"
-												{...form.getInputProps("tags")}
-												data={["tag1", "tag2", "tag3", "tag4"]}
-											/>
-										</Stack>
-
-										<CardSection>
-											<Divider />
-										</CardSection>
-
-										<Stack gap={"xs"}>
-											<Title order={2} fz={"sm"}>
-												Relationships
-											</Title>
-
-											<Select
-												required
-												label={"Author"}
-												placeholder={"Post Author"}
-												{...form.getInputProps("author")}
-												data={["author1"]}
-											/>
-										</Stack>
-									</Stack>
-								</Card>
-							</Stack>
-						</GridCol>
-					</Grid>
+						<Fieldset legend="Metadata">
+							<Grid>
+								<GridCol span={12}>
+									<InputCategoryBlog
+										label="Category"
+										description="Search a category or enter new"
+										placeholder="Post Category"
+										hoistChange={handleCategoryChange}
+										{...form.getInputProps("category")}
+									/>
+								</GridCol>
+								<GridCol span={12}>
+									<InputTagBlog
+										label="Tags"
+										description="Select tags or enter new"
+										placeholder="Post Tags"
+										hoistChange={handleTagsChange}
+										{...form.getInputProps("tags")}
+									/>
+								</GridCol>
+							</Grid>
+						</Fieldset>
+					</Stack>
 				</GridCol>
 
 				<GridCol span={12}>

@@ -4,7 +4,7 @@ import { Anchor, Button, Grid, GridCol, Group, Stack } from "@mantine/core";
 
 import LayoutSection from "@/layouts/Section";
 import Brand from "@/components/Brand";
-import InputSearchHeader from "@/components/input/search/Header";
+import InputSearchHeader from "@/components/inputs/search/Header";
 import MenuAvatar from "@/components/menus/Avatar";
 import { auth } from "@/auth";
 import AuthSignIn from "@/components/auth/signIn";

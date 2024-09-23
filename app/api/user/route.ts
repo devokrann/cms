@@ -1,20 +1,23 @@
 import prisma from "@/services/prisma";
 import hasher from "@/utilities/hasher";
-import { Role } from "@prisma/client";
+import { Role, Status } from "@prisma/client";
 
 export async function POST(req: Request) {
 	try {
-		const user = await req.json();
+		const { account, profile } = await req.json();
 
 		// query database for user
-		const userRecord = await prisma.user.findUnique({ where: { email: user.email } });
+		const userRecord = await prisma.user.findUnique({ where: { email: account.email } });
 
 		if (!userRecord) {
 			// create password hash
-			const passwordHash = await hasher.hash(user.password);
+			const passwordHash = await hasher.hash(account.password);
 
-			// create user record
-			passwordHash && (await createUser({ ...user, password: passwordHash }));
+			// create user
+			passwordHash && (await createUser({ ...account, password: passwordHash }));
+
+			// create user profile if profile is provided
+			profile.name.first && passwordHash && (await createProfile({ email: account.email, ...profile }));
 
 			return Response.json({ user: { exists: false } });
 		} else {
@@ -45,19 +48,63 @@ export async function DELETE(req: Request) {
 	}
 }
 
-const createUser = async (fields: { email: string; role: Role; name?: string; phone?: string; password?: string }) => {
+const createUser = async (fields: { role: Role; status: Status; email: string; password: string }) => {
 	try {
+		console.log(fields.role);
+		console.log(fields.status);
+
 		await prisma.user.create({
 			data: {
-				role: `${fields.role}`,
+				role: fields.role,
+				status: fields.status,
+
 				email: fields.email,
-				name: fields.name!,
-				password: fields.password ? fields.password : null,
+				password: fields.password,
+
 				verified: true,
 			},
 		});
 	} catch (error) {
-		console.error("x-> Error creating user record:", (error as Error).message);
+		console.error("x-> Error creating user:", (error as Error).message);
+		throw error;
+	}
+};
+
+const createProfile = async (fields: {
+	email: string;
+	name: { first: string; last: string };
+	bio: string;
+	phone: string;
+	address: string;
+	city: string;
+	state: string;
+	country: string;
+}) => {
+	try {
+		const joinedName = `${fields.name.first} ${fields.name.last}`;
+
+		await prisma.user.update({
+			where: { email: fields.email },
+
+			data: {
+				name: joinedName.trim().length > 0 ? joinedName : null,
+
+				profile: {
+					create: {
+						firstName: fields.name.first,
+						lastName: fields.name.last,
+						bio: fields.bio,
+						phone: fields.phone,
+						address: fields.address,
+						city: fields.city,
+						state: fields.state,
+						country: fields.country,
+					},
+				},
+			},
+		});
+	} catch (error) {
+		console.error("x-> Error creating user profile:", (error as Error).message);
 		throw error;
 	}
 };
