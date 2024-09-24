@@ -11,8 +11,8 @@ interface typeOption {
 	value: string;
 }
 
-export default function Blog({ label, description, placeholder, error, hoistChange }: any) {
-	const [value, setValue] = useState<string[]>([]);
+export default function Blog({ label, description, placeholder, hoistChange, initialValue }: any) {
+	const [value, setValue] = useState<string[]>(initialValue);
 	const [searchValue, setSearchValue] = useState("");
 
 	const [tagOptions, setTagOptions] = useState<typeOption[]>([]);
@@ -55,6 +55,13 @@ export default function Blog({ label, description, placeholder, error, hoistChan
 		fetchTags();
 	}, []);
 
+	useEffect(() => {
+		if (initialValue[0] == "clear") {
+			setValue([]);
+			setSearchValue("");
+		}
+	}, [initialValue]);
+
 	return (
 		<MultiSelect
 			label={label}
@@ -77,7 +84,6 @@ export default function Blog({ label, description, placeholder, error, hoistChan
 			hidePickedOptions
 			maxValues={10}
 			maxDropdownHeight={200}
-			error={error}
 		/>
 	);
 }

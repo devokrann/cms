@@ -64,8 +64,7 @@ export default function Post() {
 
 		validate: {
 			title: hasLength({ min: 2, max: 64 }, "Between 2 and 64 characters"),
-			author: value => userId.length < 1 && "Select an author",
-			tags: value => postTags.length < 1 && "Select or create some tags",
+			author: value => !userId || (userId.length < 1 && "Select an author"),
 		},
 	});
 
@@ -79,6 +78,17 @@ export default function Post() {
 			category: rawData.category.trim(),
 			tags: rawData.tags,
 		};
+	};
+
+	const handleReset = () => {
+		// clear internal elements
+		form.reset();
+
+		// clear external elements
+		setUserId("clear");
+		setPostContent("clear");
+		setPostCategory("clear");
+		setPostTags(["clear"]);
 	};
 
 	const handleSubmit = async () => {
@@ -124,7 +134,8 @@ export default function Post() {
 					variant: "failed",
 				});
 			} finally {
-				// form.reset();
+				// reset from
+				handleReset();
 				setSubmitted(false);
 			}
 		}
@@ -181,6 +192,7 @@ export default function Post() {
 											hoistChange={handleUserChange}
 											{...form.getInputProps("author")}
 											required
+											initialValue={userId}
 										/>
 									</GridCol>
 									<GridCol span={{ base: 12, md: 6 }}>
@@ -196,7 +208,7 @@ export default function Post() {
 						</GridCol>
 
 						<GridCol span={12}>
-							<InputContentBlog hoistChange={handleContentChange} />
+							<InputContentBlog hoistChange={handleContentChange} initialValue={postContent} />
 						</GridCol>
 					</Grid>
 				</GridCol>
@@ -216,6 +228,7 @@ export default function Post() {
 										placeholder="Post Category"
 										hoistChange={handleCategoryChange}
 										{...form.getInputProps("category")}
+										initialValue={postCategory}
 									/>
 								</GridCol>
 								<GridCol span={12}>
@@ -225,6 +238,7 @@ export default function Post() {
 										placeholder="Post Tags"
 										hoistChange={handleTagsChange}
 										{...form.getInputProps("tags")}
+										initialValue={postTags}
 									/>
 								</GridCol>
 							</Grid>
@@ -234,7 +248,7 @@ export default function Post() {
 
 				<GridCol span={12}>
 					<Group mt={"md"}>
-						<Button variant="light" type="reset" onClick={() => form.reset()} disabled={submitted}>
+						<Button variant="light" type="reset" onClick={handleReset} disabled={submitted}>
 							Cancel
 						</Button>
 

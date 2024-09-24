@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { RichTextEditor, Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
@@ -10,9 +10,9 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 
-export default function Blog({ hoistChange }: any) {
+export default function Blog({ hoistChange, initialValue }: any) {
 	// const [mounted, setMounted] = useState(false);
-	const [content, setContent] = useState<string>();
+	const [content, setContent] = useState<string>(initialValue);
 
 	const editor = useEditor({
 		extensions: [
@@ -25,6 +25,11 @@ export default function Blog({ hoistChange }: any) {
 		],
 		content,
 		onUpdate: ({ editor }) => {
+			// if (initialValue == "clear") {
+			// 	setContent("");
+			// 	console.log("clear");
+			// }
+
 			const html = editor.getHTML(); // Get the HTML content
 			setContent(html); // Update the content state
 			hoistChange(html); // lift the state
@@ -43,6 +48,13 @@ export default function Blog({ hoistChange }: any) {
 	// useEffect(() => {
 	// 	setMounted(true);
 	// }, []);
+
+	useEffect(() => {
+		if (initialValue == "clear") {
+			setContent("");
+			editor?.commands.clearContent();
+		}
+	}, [initialValue]);
 
 	return (
 		<RichTextEditor editor={editor} styles={{ content: { minHeight: "50vh" } }}>
