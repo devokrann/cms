@@ -23,8 +23,8 @@ import { IconSearch } from "@tabler/icons-react";
 import { typeUser } from "@/types/user";
 import { getUsers } from "@/handlers/database/users";
 
-export default function User({ hoistChange, label, placeholder, error, required, size }: any) {
-	const [value, setValue] = useState<string | null>(null);
+export default function User({ hoistChange, label, placeholder, error, required, size, initialValue }: any) {
+	const [value, setValue] = useState<string | null>(initialValue);
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState<typeUser[]>([]);
 
@@ -69,6 +69,13 @@ export default function User({ hoistChange, label, placeholder, error, required,
 			{item.name}
 		</ComboboxOption>
 	));
+
+	useEffect(() => {
+		if (initialValue == "clear") {
+			setSearch("");
+			setValue("");
+		}
+	}, [initialValue]);
 
 	return (
 		<Combobox

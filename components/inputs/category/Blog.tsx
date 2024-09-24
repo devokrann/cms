@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
 	Button,
@@ -23,8 +23,8 @@ import { typeCategory } from "@/types/category";
 import { addCategory, getCategories } from "@/handlers/database/categories";
 import { capitalizeWords } from "@/handlers/parsers/string";
 
-export default function Blog({ hoistChange, label, placeholder, description, error, required, size }: any) {
-	const [value, setValue] = useState<string | null>(null);
+export default function Blog({ hoistChange, label, placeholder, description, required, size, initialValue }: any) {
+	const [value, setValue] = useState<string | null>(initialValue);
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState<typeCategory[]>([]);
 
@@ -74,6 +74,13 @@ export default function Blog({ hoistChange, label, placeholder, description, err
 		}
 	};
 
+	useEffect(() => {
+		if (initialValue == "clear") {
+			setSearch("");
+			setValue("");
+		}
+	}, [initialValue]);
+
 	return (
 		<Combobox
 			store={combobox}
@@ -109,7 +116,6 @@ export default function Blog({ hoistChange, label, placeholder, description, err
 					leftSection={<IconSearch size={16} stroke={1.5} />}
 					rightSection={<ComboboxChevron />}
 					rightSectionPointerEvents="none"
-					error={error}
 				/>
 			</ComboboxTarget>
 
