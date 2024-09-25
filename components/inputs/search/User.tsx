@@ -7,7 +7,6 @@ import {
 	ComboboxChevron,
 	ComboboxDropdown,
 	ComboboxEmpty,
-	ComboboxFooter,
 	ComboboxGroup,
 	ComboboxOption,
 	ComboboxOptions,
@@ -91,7 +90,6 @@ export default function User({ hoistChange, label, placeholder, error, required,
 			<ComboboxTarget>
 				<InputBase
 					size={size ? size : undefined}
-					w={240}
 					value={search}
 					onChange={event => {
 						combobox.openDropdown();

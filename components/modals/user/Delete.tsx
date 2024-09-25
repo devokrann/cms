@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { typeUser } from "@/types/user";

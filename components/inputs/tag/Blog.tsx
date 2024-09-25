@@ -25,13 +25,13 @@ export default function Blog({ label, description, placeholder, hoistChange, ini
 
 			const value = searchValue.trim().toLowerCase();
 
-			await addTag(value);
+			const addTagRecord = await addTag(value);
 
 			setTagOptions([
 				...tagOptions,
 				{
-					label: capitalizeWords(searchValue),
-					value: value.toLowerCase(),
+					label: capitalizeWords(addTagRecord.tag.tag.title),
+					value: value,
 				},
 			]);
 		} catch (e) {
@@ -77,7 +77,7 @@ export default function Blog({ label, description, placeholder, hoistChange, ini
 			onSearchChange={setSearchValue}
 			nothingFoundMessage={
 				<Button variant="light" size="xs" onClick={updateTags} loading={loading} fw={"normal"}>
-					Create &apos;{searchValue}&apos;
+					Create &apos;{searchValue.trim()}&apos;
 				</Button>
 			}
 			searchable

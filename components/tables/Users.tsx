@@ -302,20 +302,25 @@ export default function Users() {
 			</TableTd>
 
 			<TableTd w={tableWidths.name}>{user.name}</TableTd>
+
 			<TableTd w={tableWidths.email}>
 				<Anchor inherit component={Link} href={`/listings/users/${user.id}`} underline="always">
 					{user.email}
 				</Anchor>
 			</TableTd>
+
 			<TableTd w={tableWidths.role} display={{ base: "none", lg: "table-cell" }}>
 				{capitalizeWord(user.role)}
 			</TableTd>
+
 			<TableTd w={tableWidths.status}>
 				<Badge size="xs" variant="light" color={getStatusColor(user.status as enumUserStatus)}>
 					{user.status}
 				</Badge>
 			</TableTd>
+
 			<TableTd w={tableWidths.created}>{parseDateYmd(user.createdAt!)}</TableTd>
+
 			<TableTd w={tableWidths.delete}>
 				<Center>
 					<ModalUserDelete data={user}>

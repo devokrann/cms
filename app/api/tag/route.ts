@@ -9,9 +9,9 @@ export async function POST(req: Request) {
 
 		if (!tagRecord) {
 			// create tag
-			await prisma.tag.create({ data: { title: tagTitle } });
+			const createTag = await prisma.tag.create({ data: { title: tagTitle } });
 
-			return Response.json({ tag: { exists: false } });
+			return Response.json({ tag: { exists: false, tag: createTag } });
 		} else {
 			return Response.json({ tag: { exists: true } });
 		}
