@@ -84,7 +84,7 @@ model Post {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String    @unique @map("user_id")
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId String?   @unique @map("category_id")
+  categoryId String?   @map("category_id")
   tags       Tag[]
 
   @@unique([userId, title])

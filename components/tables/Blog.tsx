@@ -9,7 +9,6 @@ import {
 	Group,
 	Table,
 	TableCaption,
-	TableScrollContainer,
 	TableTbody,
 	TableTd,
 	TableTh,
@@ -18,8 +17,9 @@ import {
 	Text,
 } from "@mantine/core";
 
-import classes from "./Blog.module.scss";
 import { IconSelector } from "@tabler/icons-react";
+
+import classes from "./Blog.module.scss";
 
 export default function Blog() {
 	const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -107,11 +107,13 @@ export default function Blog() {
 			</Table.Td>
 
 			<TableTd>{post.title}</TableTd>
+
 			<TableTd>
 				<Badge color={"gray"} variant="light" size="xs">
 					{post.category}
 				</Badge>
 			</TableTd>
+
 			<TableTd>{post.created.toDateString()}</TableTd>
 		</TableTr>
 	));
@@ -133,6 +135,7 @@ export default function Blog() {
 			<TableThead tt={"uppercase"}>
 				<TableTr>
 					<TableTh />
+
 					<TableTh>
 						<Group gap={"xs"}>
 							<Text component="span" inherit>
@@ -141,6 +144,7 @@ export default function Blog() {
 							{sortButton}
 						</Group>
 					</TableTh>
+
 					<TableTh>
 						<Group gap={"xs"}>
 							<Text component="span" inherit>
@@ -149,6 +153,7 @@ export default function Blog() {
 							{sortButton}
 						</Group>
 					</TableTh>
+
 					<TableTh>
 						<Group gap={"xs"}>
 							<Text component="span" inherit>

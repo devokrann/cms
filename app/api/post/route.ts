@@ -4,7 +4,9 @@ export async function POST(req: Request) {
 	try {
 		const post = await req.json();
 
-		// query database for tag
+		console.log(post);
+
+		// query database for post
 		const postRecord = await prisma.post.findUnique({
 			where: { userId_title: { userId: post.author, title: post.title } },
 		});
@@ -15,25 +17,41 @@ export async function POST(req: Request) {
 				where: { id: post.author },
 				data: {
 					posts: {
-						create: {
-							title: post.title,
-							content: post.content,
-
-							tags: {
-								connect: post.tags.map((t: string) => {
-									return { title: t };
-								}),
+						create: [
+							{
+								title: post.title,
+								content: post.content,
 							},
-
-							category: { connect: { id: post.category } },
-						},
+						],
 					},
 				},
 			});
 
-			return Response.json({ tag: { exists: false } });
+			// connect tags to post
+			if (post.tags[0]) {
+				await prisma.post.update({
+					where: { userId_title: { userId: post.author, title: post.title } },
+					data: {
+						tags: {
+							connect: post.tags.map((t: string) => {
+								return { title: t };
+							}),
+						},
+					},
+				});
+			}
+
+			// connect category to post
+			if (post.category) {
+				await prisma.post.update({
+					where: { userId_title: { userId: post.author, title: post.title } },
+					data: { categoryId: post.category },
+				});
+			}
+
+			return Response.json({ post: { exists: false } });
 		} else {
-			return Response.json({ tag: { exists: true } });
+			return Response.json({ post: { exists: true } });
 		}
 	} catch (error) {
 		console.error("x-> Error creating post:", error);
@@ -45,16 +63,16 @@ export async function DELETE(req: Request) {
 	try {
 		const post = await req.json();
 
-		// query database for tag
+		// query database for post
 		const postRecord = await prisma.post.findUnique({ where: { id: post.id } });
 
 		if (!postRecord) {
-			return Response.json({ tag: { exists: false } });
+			return Response.json({ post: { exists: false } });
 		} else {
 			// delete post
 			await prisma.post.delete({ where: { id: post.id } });
 
-			return Response.json({ tag: { exists: true } });
+			return Response.json({ post: { exists: true } });
 		}
 	} catch (error) {
 		console.error("x-> Error deleting post:", error);

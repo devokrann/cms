@@ -63,20 +63,20 @@ export default function Post() {
 		},
 
 		validate: {
-			title: hasLength({ min: 2, max: 64 }, "Between 2 and 64 characters"),
-			author: value => !userId || (userId.length < 1 && "Select an author"),
+			title: hasLength({ min: 2, max: 120 }, "Between 2 and 120 characters"),
+			author: hasLength({ min: 2, max: 64 }, "Select an author"),
 		},
 	});
 
 	const parse = (rawData: typeFormPost) => {
 		return {
 			title: rawData.title.trim(),
-			content: rawData.content.trim(),
+			content: rawData.content,
 			createdAt: rawData.createdAt,
 
-			author: rawData.author.trim(),
-			category: rawData.category.trim(),
-			tags: rawData.tags,
+			author: rawData.author,
+			category: rawData.category == "clear" ? "" : rawData.category,
+			tags: rawData.tags[0] == "clear" ? [""] : rawData.tags,
 		};
 	};
 
@@ -93,17 +93,21 @@ export default function Post() {
 
 	const handleSubmit = async () => {
 		if (form.isValid()) {
-			try {
-				setSubmitted(true);
+			if (postContent.trim().length > 16) {
+				try {
+					setSubmitted(true);
 
-				await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
-					method: enumRequest.POST,
-					body: JSON.stringify(parse(form.values)),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				}).then(res => {
+					const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
+						method: enumRequest.POST,
+						body: JSON.stringify(parse(form.values)),
+						headers: {
+							"Content-Type": "application/json",
+							Accept: "application/json",
+						},
+					});
+
+					const res = await response.json();
+
 					if (!res) {
 						notifications.show({
 							id: "blog-post-create-failed-no-response",
@@ -114,58 +118,78 @@ export default function Post() {
 							variant: "failed",
 						});
 					} else {
-						notifications.show({
-							id: "blog-post-create-success",
-							icon: <IconCheck size={16} stroke={1.5} />,
-							autoClose: 5000,
-							title: "Post Created",
-							message: `The post has been added`,
-							variant: "success",
-						});
+						if (!res.post.exists) {
+							notifications.show({
+								id: "blog-post-create-success",
+								icon: <IconCheck size={16} stroke={1.5} />,
+								autoClose: 5000,
+								title: "Post Created",
+								message: `The post has been added`,
+								variant: "success",
+							});
+						} else {
+							notifications.show({
+								id: "blog-post-create-failed-exists",
+								icon: <IconX size={16} stroke={1.5} />,
+								autoClose: 5000,
+								title: "Post Exists",
+								message: `That Title-Author combination already exists.`,
+								variant: "failed",
+							});
+						}
 					}
-				});
-			} catch (error) {
+				} catch (error) {
+					notifications.show({
+						id: "blog-post-create-failed",
+						icon: <IconX size={16} stroke={1.5} />,
+						autoClose: 5000,
+						title: "Submisstion Failed",
+						message: (error as Error).message,
+						variant: "failed",
+					});
+				} finally {
+					// reset from
+					handleReset();
+					setSubmitted(false);
+				}
+			} else {
 				notifications.show({
-					id: "blog-post-create-failed",
+					id: "blog-post-create-failed-content",
 					icon: <IconX size={16} stroke={1.5} />,
 					autoClose: 5000,
-					title: "Submisstion Failed",
-					message: (error as Error).message,
+					title: "Content Required",
+					message: "Add blog post content",
 					variant: "failed",
 				});
-			} finally {
-				// reset from
-				handleReset();
-				setSubmitted(false);
 			}
 		}
 	};
 
 	useEffect(() => {
-		if (form.isDirty()) {
-			form.setValues({ ...form.values, author: userId });
-			form.validate();
+		if (userId !== form.values.author) {
+			form.setFieldValue("author", userId);
+			// form.validate(); // Trigger form validation after updating
 		}
 	}, [userId]);
 
 	useEffect(() => {
-		if (form.isDirty()) {
-			form.setValues({ ...form.values, tags: postTags });
-			form.validate();
+		if (postTags !== form.values.tags) {
+			form.setFieldValue("tags", postTags);
+			// form.validate(); // Trigger form validation after updating
 		}
 	}, [postTags]);
 
 	useEffect(() => {
-		if (form.isDirty()) {
-			form.setValues({ ...form.values, content: postContent });
-			form.validate();
+		if (postContent !== form.values.content) {
+			form.setFieldValue("content", postContent);
+			// form.validate(); // Trigger form validation after updating
 		}
 	}, [postContent]);
 
 	useEffect(() => {
-		if (form.isDirty()) {
-			form.setValues({ ...form.values, category: postCategory });
-			form.validate();
+		if (postCategory !== form.values.category) {
+			form.setFieldValue("category", postCategory);
+			// form.validate(); // Trigger form validation after updating
 		}
 	}, [postCategory]);
 
@@ -193,6 +217,7 @@ export default function Post() {
 											{...form.getInputProps("author")}
 											required
 											initialValue={userId}
+											autoComplete="off"
 										/>
 									</GridCol>
 									<GridCol span={{ base: 12, md: 6 }}>
@@ -229,6 +254,7 @@ export default function Post() {
 										hoistChange={handleCategoryChange}
 										{...form.getInputProps("category")}
 										initialValue={postCategory}
+										autoComplete="off"
 									/>
 								</GridCol>
 								<GridCol span={12}>
@@ -239,6 +265,7 @@ export default function Post() {
 										hoistChange={handleTagsChange}
 										{...form.getInputProps("tags")}
 										initialValue={postTags}
+										autoComplete="off"
 									/>
 								</GridCol>
 							</Grid>
