@@ -30,13 +30,12 @@ import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler
 
 import InputSearchBlog from "@/components/inputs/search/Blog";
 
-import { typePost } from "@/types/post";
-
 import classes from "./Blog.module.scss";
 
 import { getPosts, removePosts } from "@/handlers/database/posts";
 import { enumSort } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
+import { PostRelations } from "@/types/model/post";
 
 interface typeSortObject {
 	order: enumSort;
@@ -51,7 +50,7 @@ enum enumTablePosts {
 }
 
 export default function Blog() {
-	const [posts, setPosts] = useState<typePost[] | null>(null);
+	const [posts, setPosts] = useState<PostRelations[] | null>(null);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -64,7 +63,7 @@ export default function Blog() {
 
 	// paginate logic
 	const [activePage, setPage] = useState(1);
-	const [items, setItems] = useState<typePost[]>([]);
+	const [items, setItems] = useState<PostRelations[]>([]);
 
 	const divisors = [5, 10, 15, 20, 25];
 	const [divisor, setDivisor] = useState<string | null>(divisors[0].toString());
@@ -147,7 +146,7 @@ export default function Blog() {
 					if (prevCategoryOrder.order == enumSort.DEFAULT || prevCategoryOrder.order == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'category' ascending
 						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => a.category.title.localeCompare(b.category.title))
+							[...prevPosts!].sort((a, b) => a.category?.title.localeCompare(b.category?.title!)!)
 						);
 
 						return {
@@ -157,7 +156,9 @@ export default function Blog() {
 					} else {
 						// Create a shallow copy of items and sort by 'category' descending
 						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => a.category.title.localeCompare(b.category.title)).reverse()
+							[...prevPosts!]
+								.sort((a, b) => a.category?.title.localeCompare(b.category?.title!)!)
+								.reverse()
 						);
 
 						return {
@@ -293,7 +294,7 @@ export default function Blog() {
 
 				<TableTd w={tableWidths.category}>
 					<Badge color={"gray"} variant="light" size="xs">
-						{post.category.title}
+						{post.category?.title}
 					</Badge>
 				</TableTd>
 
@@ -469,7 +470,7 @@ export default function Blog() {
 	);
 }
 
-const chunkPosts = (array: typePost[], size: number): typePost[][] => {
+const chunkPosts = (array: PostRelations[], size: number): PostRelations[][] => {
 	if (!array.length) {
 		return [];
 	}

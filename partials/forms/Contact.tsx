@@ -12,7 +12,7 @@ import text from "@/libraries/validators/special/text";
 import email from "@/libraries/validators/special/email";
 import phone from "@/libraries/validators/special/phone";
 
-import { typeFormContact } from "@/types/form";
+import { Contact as typeContact } from "@/types/form";
 import { capitalizeWord, capitalizeWords } from "@/handlers/parsers/string";
 
 export default function Contact() {
@@ -38,7 +38,7 @@ export default function Contact() {
 		},
 	});
 
-	const parse = (rawData: typeFormContact) => {
+	const parse = (rawData: typeContact) => {
 		return {
 			fname: capitalizeWord(rawData.fname.trim()),
 			lname: capitalizeWord(rawData.lname.trim()),
@@ -49,7 +49,7 @@ export default function Contact() {
 		};
 	};
 
-	const handleSubmit = async (formValues: typeFormContact) => {
+	const handleSubmit = async (formValues: typeContact) => {
 		if (form.isValid()) {
 			try {
 				setSubmitted(true);

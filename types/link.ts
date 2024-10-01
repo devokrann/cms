@@ -1,4 +1,4 @@
-export interface typeLink {
+export interface Link {
 	link: string;
 	label: string;
 	alt?: string;

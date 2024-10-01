@@ -1,10 +1,9 @@
-import { typeDatabaseFields } from "./database";
-import { typeIpInfo } from "./ipInfo";
+import { IpInfo } from "./ipInfo";
 
-interface typeIPOS extends typeIpInfo {
+interface IPOS extends IpInfo {
 	os: string;
 }
 
-export interface typeDevice extends typeIPOS {
+export interface Device extends IPOS {
 	session: any;
 }

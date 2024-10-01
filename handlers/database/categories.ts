@@ -1,3 +1,4 @@
+import { CategoryCreate, CategoryGet } from "@/types/model/category";
 import { enumRequest } from "@/types/enums";
 
 const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
@@ -21,11 +22,11 @@ export const getCategories = async () => {
 	}
 };
 
-export const addCategory = async (title: string) => {
+export const addCategory = async (category: CategoryCreate) => {
 	try {
 		const response = await fetch(`${apiUrl}/category`, {
 			method: enumRequest.POST,
-			body: JSON.stringify(title),
+			body: JSON.stringify(category),
 			headers,
 		});
 
@@ -37,11 +38,11 @@ export const addCategory = async (title: string) => {
 	}
 };
 
-export const removeCategory = async (title: string) => {
+export const removeCategory = async (category: CategoryGet) => {
 	try {
 		const response = await fetch(`${apiUrl}/category`, {
 			method: enumRequest.DELETE,
-			body: JSON.stringify(title),
+			body: JSON.stringify(category),
 			headers,
 		});
 

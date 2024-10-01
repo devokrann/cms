@@ -34,7 +34,7 @@ import email from "@/libraries/validators/special/email";
 
 import { signIn as authSignIn } from "next-auth/react";
 
-import { typeSignIn } from "@/types/form";
+import { SignIn as typeSignIn } from "@/types/form";
 
 export default function SignIn() {
 	const [submitted, setSubmitted] = useState(false);

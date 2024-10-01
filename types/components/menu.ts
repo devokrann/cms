@@ -1,5 +1,5 @@
 import { Icon } from "@tabler/icons-react";
-import { typeLink } from "../link";
+import { Link as typeLink } from "../link";
 
 export interface typeMenu extends typeLink {
 	subLinks?: typeLink[];

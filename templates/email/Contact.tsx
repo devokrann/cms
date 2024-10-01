@@ -4,9 +4,9 @@ import { Body, Container, Head, Heading, Html, Img, Link, Preview, Section, Text
 
 import contact from "@/data/contact";
 
-import { typeFormContact } from "@/types/form";
+import { Contact as typeContact } from "@/types/form";
 
-export default function Contact(data: typeFormContact) {
+export default function Contact(data: typeContact) {
 	return (
 		<Html lang="en">
 			<Head />

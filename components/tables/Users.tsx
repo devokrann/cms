@@ -29,7 +29,6 @@ import {
 
 import classes from "./Users.module.scss";
 import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
-import { typeUser } from "@/types/user";
 import { enumSort, enumUserStatus } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import ModalUserDelete from "../modals/user/Delete";
@@ -37,6 +36,7 @@ import InputSearchUser from "@/components/inputs/search/User";
 import { capitalizeWord } from "@/handlers/parsers/string";
 import Link from "next/link";
 import { getUsers } from "@/handlers/database/users";
+import { UserRelations } from "@/types/model/user";
 
 interface typeSortObject {
 	order: enumSort;
@@ -52,7 +52,7 @@ enum enumTableUsers {
 }
 
 export default function Users() {
-	const [users, setUsers] = useState<typeUser[] | null>(null);
+	const [users, setUsers] = useState<UserRelations[] | null>(null);
 
 	useEffect(() => {
 		const fetchUsers = async () => {
@@ -65,7 +65,7 @@ export default function Users() {
 
 	// paginate logic
 	const [activePage, setPage] = useState(1);
-	const [items, setItems] = useState<typeUser[]>([]);
+	const [items, setItems] = useState<UserRelations[]>([]);
 
 	const divisors = [5, 10, 15, 20, 25];
 	const [divisor, setDivisor] = useState<string | null>(divisors[0].toString());
@@ -535,7 +535,7 @@ const getStatusColor = (status: enumUserStatus) => {
 	}
 };
 
-const chunkUsers = (array: typeUser[], size: number): typeUser[][] => {
+const chunkUsers = (array: UserRelations[], size: number): UserRelations[][] => {
 	if (!array.length) {
 		return [];
 	}
