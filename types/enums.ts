@@ -1,3 +1,8 @@
+export enum enumDateType {
+	PAST = "past",
+	FUTURE = "future",
+}
+
 export enum enumSort {
 	ASCENDING = "ASCENDING",
 	DESCENDING = "DESCENDING",

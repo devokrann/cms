@@ -2,7 +2,7 @@ import React from "react";
 
 import { Box, Divider, Flex } from "@mantine/core";
 
-import { typeBody } from "@/types/layout";
+import { Body as typeBody } from "@/types/layout";
 import { widths } from "@/types/mantine";
 
 export default function Body({ children, bar, header, nav, hero, aside, footer }: typeBody) {

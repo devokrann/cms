@@ -1,4 +1,4 @@
-import { typeIpInfo } from "@/types/ipInfo";
+import { IpInfo } from "@/types/ipInfo";
 
 export const getLocationData = async () => {
 	try {

@@ -2,10 +2,14 @@ import prisma from "@/services/prisma";
 import hasher from "@/utilities/hasher";
 import jwt from "jsonwebtoken";
 
-import { typePasswordReset } from "@/types/apis";
 import { sendPasswordChangedEmail } from "@/handlers/email";
 
-export async function POST(req: Request, { params }: { params: typePasswordReset }) {
+interface PasswordReset {
+	userId: string;
+	token: string;
+}
+
+export async function POST(req: Request, { params }: { params: PasswordReset }) {
 	try {
 		// query database for user
 		const userRecord = await prisma.user.findUnique({ where: { id: params.userId } });

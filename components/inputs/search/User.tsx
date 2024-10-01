@@ -19,13 +19,13 @@ import {
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { typeUser } from "@/types/user";
 import { getUsers } from "@/handlers/database/users";
+import { UserGet } from "@/types/model/user";
 
 export default function User({ hoistChange, label, placeholder, error, required, size, initialValue }: any) {
 	const [value, setValue] = useState<string | null>(initialValue);
 	const [loading, setLoading] = useState(false);
-	const [data, setData] = useState<typeUser[]>([]);
+	const [data, setData] = useState<UserGet[]>([]);
 
 	const combobox = useCombobox({
 		onDropdownClose: () => combobox.resetSelectedOption(),
@@ -163,7 +163,7 @@ export default function User({ hoistChange, label, placeholder, error, required,
 }
 
 function getAsyncData() {
-	return new Promise<typeUser[]>(resolve => {
+	return new Promise<UserGet[]>(resolve => {
 		setTimeout(() => resolve(getUsers()), 0);
 	});
 }

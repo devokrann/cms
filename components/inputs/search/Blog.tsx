@@ -19,13 +19,13 @@ import {
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { typePost } from "@/types/post";
 import { getPosts } from "@/handlers/database/posts";
+import { PostRelations } from "@/types/model/post";
 
 export default function Blog({ hoistChange, label, placeholder, error, required, size, initialValue }: any) {
 	const [value, setValue] = useState<string | null>(initialValue);
 	const [loading, setLoading] = useState(false);
-	const [data, setData] = useState<typePost[]>([]);
+	const [data, setData] = useState<PostRelations[]>([]);
 
 	const combobox = useCombobox({
 		onDropdownClose: () => combobox.resetSelectedOption(),
@@ -168,7 +168,7 @@ export default function Blog({ hoistChange, label, placeholder, error, required,
 }
 
 function getAsyncData() {
-	return new Promise<typePost[]>(resolve => {
+	return new Promise<PostRelations[]>(resolve => {
 		setTimeout(() => resolve(getPosts()), 0);
 	});
 }

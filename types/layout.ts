@@ -1,8 +1,8 @@
 import React from "react";
 
-import { sizes, widths } from "./mantine";
+import { Sizes, Widths } from "./mantine";
 
-export interface typeBody {
+export interface Body {
 	bar?: React.ReactNode;
 	header?: React.ReactNode;
 	nav?: React.ReactNode;
@@ -12,28 +12,28 @@ export interface typeBody {
 		gap?: string | number;
 		left?: {
 			component: React.ReactNode;
-			width?: widths;
+			width?: Widths;
 			withBorder?: boolean;
 		};
 		right?: {
 			component: React.ReactNode;
-			width?: widths;
+			width?: Widths;
 			withBorder?: boolean;
 		};
 	};
 	footer?: React.ReactNode;
 }
 
-export interface typePage {
-	padded?: boolean | number | sizes;
-	stacked?: boolean | number | sizes;
+export interface Page {
+	padded?: boolean | number | Sizes;
+	stacked?: boolean | number | Sizes;
 	children: React.ReactNode;
 }
 
-export interface typeSection {
-	containerized?: boolean | sizes | "responsive";
-	padded?: boolean | number | sizes;
-	margined?: boolean | number | sizes;
+export interface Section {
+	containerized?: boolean | Sizes | "responsive";
+	padded?: boolean | number | Sizes;
+	margined?: boolean | number | Sizes;
 	className?: string;
 	bordered?: boolean;
 	shadowed?: boolean;

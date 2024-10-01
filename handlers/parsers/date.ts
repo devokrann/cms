@@ -1,8 +1,17 @@
-import { TimeDifference, DateType } from "@/types/date";
+import { enumDateType } from "@/types/enums";
+
+interface TimeDifference {
+	years: number;
+	months: number;
+	days: number;
+	hours: number;
+	minutes: number;
+	seconds: number;
+}
 
 export const getTimeDifference = (
 	targetDate: Date,
-	dateType: DateType
+	dateType: enumDateType
 ): { valid: boolean; difference?: TimeDifference } => {
 	const currentDate = new Date();
 
@@ -17,7 +26,7 @@ export const getTimeDifference = (
 
 	// handle different date types
 	switch (dateType) {
-		case DateType.PAST:
+		case enumDateType.PAST:
 			valid = targetDate < currentDate;
 
 			if (!valid) {
@@ -32,7 +41,7 @@ export const getTimeDifference = (
 
 				return { valid, difference: { years, months, days, hours, minutes, seconds } };
 			}
-		case DateType.FUTURE:
+		case enumDateType.FUTURE:
 			valid = targetDate > currentDate;
 
 			if (!valid) {

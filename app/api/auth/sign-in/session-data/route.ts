@@ -1,6 +1,6 @@
 import prisma from "@/services/prisma";
-import { typeDevice } from "@/types/device";
-import { typeIpInfo } from "@/types/ipInfo";
+import { Device } from "@/types/device";
+import { IpInfo } from "@/types/ipInfo";
 
 export async function POST(req: Request) {
 	try {
@@ -53,8 +53,8 @@ const createSession = async (fields: {
 	userId: string;
 	token: string;
 	tokenExpiry: Date;
-	device: typeDevice | null;
-	locationData: typeIpInfo | null;
+	device: Device | null;
+	locationData: IpInfo | null;
 }) => {
 	try {
 		await prisma.user.update({

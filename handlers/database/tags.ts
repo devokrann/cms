@@ -1,6 +1,7 @@
 import { enumRequest } from "@/types/enums";
+import { TagCreate, TagGet } from "@/types/model/tag";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/tag`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 const headers = {
 	"Content-Type": "application/json",
 	Accept: "application/json",
@@ -8,7 +9,7 @@ const headers = {
 
 export const getTags = async () => {
 	try {
-		const response = await fetch(`${apiUrl}s`, {
+		const response = await fetch(`${apiUrl}/tags`, {
 			method: enumRequest.GET,
 			headers,
 		});
@@ -21,11 +22,27 @@ export const getTags = async () => {
 	}
 };
 
-export const addTag = async (title: string) => {
+export const removeTags = async (tags: TagGet) => {
 	try {
-		const response = await fetch(apiUrl, {
+		const response = await fetch(`${apiUrl}/tags`, {
+			method: enumRequest.DELETE,
+			body: JSON.stringify(tags),
+			headers,
+		});
+
+		const res = await response.json();
+
+		return res;
+	} catch (error) {
+		console.error("X-> Error removing tags:", error);
+	}
+};
+
+export const addTag = async (tag: TagCreate) => {
+	try {
+		const response = await fetch(`${apiUrl}/tag`, {
 			method: enumRequest.POST,
-			body: JSON.stringify(title),
+			body: JSON.stringify(tag),
 			headers,
 		});
 
@@ -37,11 +54,11 @@ export const addTag = async (title: string) => {
 	}
 };
 
-export const removeTag = async (title: string) => {
+export const removeTag = async (tag: TagGet) => {
 	try {
-		const response = await fetch(apiUrl, {
+		const response = await fetch(`${apiUrl}/tag`, {
 			method: enumRequest.DELETE,
-			body: JSON.stringify(title),
+			body: JSON.stringify(tag),
 			headers,
 		});
 
