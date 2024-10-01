@@ -25,7 +25,7 @@ export default function Blog({ label, description, placeholder, hoistChange, ini
 
 			const value = searchValue.trim().toLowerCase();
 
-			const addTagRecord = await addTag(value);
+			const addTagRecord = await addTag({ title: value });
 
 			setTagOptions([
 				...tagOptions,

@@ -62,7 +62,7 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 
 			const value = capitalizeWords(search.trim());
 
-			const result = await addCategory(value);
+			const result = await addCategory({ title: value });
 
 			if (!result.category.exists) {
 				setData(prevData => [...prevData, result.category.category]);

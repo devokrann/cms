@@ -3,10 +3,9 @@ import React from "react";
 import LayoutPage from "@/layouts/Page";
 import LayoutSection from "@/layouts/Section";
 import { Metadata } from "next";
-import { Button, Card, Divider, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Title } from "@mantine/core";
 import HeroMain from "@/layouts/heros/Main";
 
-import InputSearchBlog from "@/components/inputs/search/Blog";
 import TableBlog from "@/components/tables/Blog";
 import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
@@ -31,23 +30,7 @@ export default function Posts() {
 			</LayoutSection>
 
 			<LayoutSection margined="xl" containerized="responsive">
-				<Stack>
-					<Card withBorder shadow="xs" padding={"xs"}>
-						<Group justify="space-between">
-							<InputSearchBlog />
-
-							<Group gap={"xs"}>
-								{/* <InputShow /> */}
-								<Divider orientation="vertical" />
-								<Button size="xs">Clear Filters</Button>
-							</Group>
-						</Group>
-					</Card>
-
-					<Card withBorder padding={0} shadow="xs" c={"inherit"}>
-						<TableBlog />
-					</Card>
-				</Stack>
+				<TableBlog />
 			</LayoutSection>
 		</LayoutPage>
 	);
