@@ -25,18 +25,30 @@ import {
 	TableThead,
 	TableTr,
 	Text,
+	Tooltip,
 } from "@mantine/core";
 
 import classes from "./Users.module.scss";
-import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
+import {
+	IconChevronDown,
+	IconChevronUp,
+	IconSelector,
+	IconTrash,
+	IconUserCheck,
+	IconUserExclamation,
+	IconUserX,
+} from "@tabler/icons-react";
 import { enumSort, enumUserStatus } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import ModalUserDelete from "../modals/user/Delete";
 import InputSearchUser from "@/components/inputs/search/User";
-import { capitalizeWord } from "@/handlers/parsers/string";
+import { capitalizeWord, linkify } from "@/handlers/parsers/string";
 import Link from "next/link";
 import { getUsers } from "@/handlers/database/users";
 import { UserRelations } from "@/types/model/user";
+import ModalUserDeactivate from "../modals/user/Deactivate";
+import ModalUserActivate from "../modals/user/Activate";
+import { useSearchParams } from "next/navigation";
 
 interface typeSortObject {
 	order: enumSort;
@@ -52,6 +64,16 @@ enum enumTableUsers {
 }
 
 export default function Users() {
+	// const searchParams = useSearchParams();
+
+	// const paramName = searchParams.get("name");
+
+	// useEffect(() => {
+	// 	if (paramName) {
+	// 		setItems(users?.filter(i => linkify(i.name!)?.includes(linkify(paramName)))!);
+	// 	}
+	// }, [paramName]);
+
 	const [users, setUsers] = useState<UserRelations[] | null>(null);
 
 	useEffect(() => {
@@ -77,7 +99,15 @@ export default function Users() {
 		if (users) {
 			const chunkedUsers = chunkUsers(users!, Number(divisor));
 
-			setItems(chunkedUsers[activePage - 1].map(item => item));
+			if (chunkedUsers[activePage - 1]) {
+				setItems(chunkedUsers[activePage - 1].map(item => item));
+			} else {
+				if (activePage > 1) {
+					setPage(activePage - 1);
+				} else {
+					setItems([]);
+				}
+			}
 		}
 	}, [users, activePage, divisor]);
 
@@ -274,27 +304,26 @@ export default function Users() {
 
 	const tableWidths = {
 		check: { md: "5%", lg: "5%" },
-		name: { md: "25%", lg: "20%" },
+		name: { md: "20%", lg: "20%" },
 		email: { md: "25%", lg: "25%" },
-		role: { md: "10%", lg: "15%" },
 		status: { md: "15%", lg: "15%" },
 		created: { md: "15%", lg: "15%" },
-		delete: { md: "5%", lg: "5%" },
+		actions: { md: "10%", lg: "10%" },
 	};
 
 	const rows = items?.map(user => (
-		<TableTr key={user.email} bg={selectedRows.includes(user.email) ? "var(--mantine-color-gray-1)" : undefined}>
+		<TableTr key={user.id} bg={selectedRows.includes(user.id) ? "var(--mantine-color-gray-1)" : undefined}>
 			<TableTd w={tableWidths.check}>
 				<Center>
 					<Checkbox
 						size="xs"
 						aria-label="Select row"
-						checked={selectedRows.includes(user.email)}
+						checked={selectedRows.includes(user.id)}
 						onChange={event =>
 							setSelectedRows(
 								event.currentTarget.checked
-									? [...selectedRows, user.email]
-									: selectedRows.filter(position => position !== user.email)
+									? [...selectedRows, user.id]
+									: selectedRows.filter(position => position !== user.id)
 							)
 						}
 					/>
@@ -309,10 +338,6 @@ export default function Users() {
 				</Anchor>
 			</TableTd>
 
-			<TableTd w={tableWidths.role} display={{ base: "none", lg: "table-cell" }}>
-				{capitalizeWord(user.role)}
-			</TableTd>
-
 			<TableTd w={tableWidths.status}>
 				<Badge size="xs" variant="light" color={getStatusColor(user.status as enumUserStatus)}>
 					{user.status}
@@ -321,37 +346,91 @@ export default function Users() {
 
 			<TableTd w={tableWidths.created}>{parseDateYmd(user.createdAt!)}</TableTd>
 
-			<TableTd w={tableWidths.delete}>
-				<Center>
-					<ModalUserDelete data={user}>
-						<ActionIcon color="red" variant="light">
-							<IconTrash size={16} stroke={1.5} />
-						</ActionIcon>
+			<TableTd w={tableWidths.actions}>
+				<Group gap={"xs"}>
+					{user.status == "INACTIVE" ? (
+						<ModalUserActivate
+							selection={user}
+							users={users!}
+							setUsers={setUsers}
+							setSelectedRows={setSelectedRows}
+						>
+							<Tooltip withArrow label={"Activate account"}>
+								<ActionIcon color="green" variant="light">
+									<IconUserCheck size={16} stroke={1.5} />
+								</ActionIcon>
+							</Tooltip>
+						</ModalUserActivate>
+					) : (
+						<ModalUserDeactivate
+							selection={user}
+							users={users!}
+							setUsers={setUsers}
+							setSelectedRows={setSelectedRows}
+						>
+							<Tooltip withArrow label="Deactivate account">
+								<ActionIcon color="yellow" variant="light">
+									<IconUserX size={16} stroke={1.5} />
+								</ActionIcon>
+							</Tooltip>
+						</ModalUserDeactivate>
+					)}
+
+					<ModalUserDelete user={user} users={users!} setUsers={setUsers}>
+						<Tooltip
+							withArrow
+							label={
+								user.status == "ACTIVE"
+									? "The account must first be deactivated before deletion"
+									: "Delete account"
+							}
+							w={user.status == "ACTIVE" ? 200 : undefined}
+							multiline={user.status == "ACTIVE" ? true : false}
+						>
+							<ActionIcon color="red" variant="light" disabled={user.status == "ACTIVE"}>
+								<IconTrash size={16} stroke={1.5} />
+							</ActionIcon>
+						</Tooltip>
 					</ModalUserDelete>
-				</Center>
+				</Group>
 			</TableTd>
 		</TableTr>
 	));
 
 	const skeletonRow = (
 		<TableTr>
-			<TableTd>
+			<TableTd w={tableWidths.check}>
 				<Skeleton h={16} w={16} my={4} />
 			</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.name}>
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.email}>
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.status}>
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
-			<TableTd>
+			<TableTd w={tableWidths.created}>
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
-			<TableTd>
-				<Skeleton h={24} w={24} my={4} />
+			<TableTd w={tableWidths.actions}>
+				<Group gap={"xs"}>
+					<Skeleton h={24} w={24} my={4} />
+					<Skeleton h={24} w={24} my={4} />
+				</Group>
+			</TableTd>
+		</TableTr>
+	);
+
+	const emptyRow = (
+		<TableTr>
+			<TableTd colSpan={10}>
+				<Group justify="center" my={"xl"}>
+					<Text component="span" inherit ta={"center"}>
+						No Users Found
+					</Text>
+				</Group>
 			</TableTd>
 		</TableTr>
 	);
@@ -394,17 +473,31 @@ export default function Users() {
 						{!users ? (
 							<Skeleton h={28} w={96} />
 						) : (
-							<Button size="xs" disabled={!active} color="red" variant="light">
-								Deactivate ({selectedRows.length})
-							</Button>
+							<ModalUserDeactivate
+								selections={items.filter(i => selectedRows.includes(i.id))}
+								users={users!}
+								setUsers={setUsers}
+								setSelectedRows={setSelectedRows}
+							>
+								<Button size="xs" disabled={!active} color="yellow" variant="light">
+									Deactivate ({selectedRows.length})
+								</Button>
+							</ModalUserDeactivate>
 						)}
 
 						{!users ? (
 							<Skeleton h={28} w={96} />
 						) : (
-							<Button size="xs" disabled={!active} color="green" variant="light">
-								Activate ({selectedRows.length})
-							</Button>
+							<ModalUserActivate
+								selections={items.filter(i => selectedRows.includes(i.id))}
+								users={users!}
+								setUsers={setUsers}
+								setSelectedRows={setSelectedRows}
+							>
+								<Button size="xs" disabled={!active} color="green" variant="light">
+									Activate ({selectedRows.length})
+								</Button>
+							</ModalUserActivate>
 						)}
 					</Group>
 				</Stack>
@@ -428,10 +521,10 @@ export default function Users() {
 										<Checkbox
 											size="xs"
 											aria-label="Select row"
-											checked={users?.length != 0 && selectedRows.length == users?.length}
+											checked={items.length != 0 && selectedRows.length == items.length}
 											onChange={event =>
 												setSelectedRows(
-													event.currentTarget.checked ? users?.map(u => u.email)! : []
+													event.currentTarget.checked ? items?.map(u => u.id)! : []
 												)
 											}
 										/>
@@ -457,15 +550,6 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh w={tableWidths.role} display={{ base: "none", lg: "table-cell" }}>
-								<Group gap={"xs"}>
-									<Text component="span" inherit>
-										Role
-									</Text>
-									{roleOrder?.button}
-								</Group>
-							</TableTh>
-
 							<TableTh w={tableWidths.status}>
 								<Group gap={"xs"}>
 									<Text component="span" inherit>
@@ -484,11 +568,13 @@ export default function Users() {
 								</Group>
 							</TableTh>
 
-							<TableTh w={tableWidths.delete} />
+							<TableTh w={tableWidths.actions} />
 						</TableTr>
 					</TableThead>
 
-					<TableTbody>{!users ? [skeletonRow, skeletonRow, skeletonRow] : rows}</TableTbody>
+					<TableTbody>
+						{!users ? [skeletonRow, skeletonRow, skeletonRow] : users.length > 0 ? rows : emptyRow}
+					</TableTbody>
 
 					<TableCaption>
 						<Group justify="space-between">
@@ -530,7 +616,7 @@ const getStatusColor = (status: enumUserStatus) => {
 	switch (status) {
 		case enumUserStatus.ACTIVE:
 			return "green";
-		case enumUserStatus.SUSPENDED:
+		case enumUserStatus.INACTIVE:
 			return "yellow";
 	}
 };

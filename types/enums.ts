@@ -24,5 +24,5 @@ export enum enumUserRole {
 
 export enum enumUserStatus {
 	ACTIVE = "ACTIVE",
-	SUSPENDED = "SUSPENDED",
+	INACTIVE = "INACTIVE",
 }

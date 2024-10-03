@@ -5,9 +5,19 @@ import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { removePost } from "@/handlers/database/posts";
-import { PostGet } from "@/types/model/post";
+import { PostRelations } from "@/types/model/post";
 
-export default function Delete({ children, data }: { children: React.ReactNode; data: PostGet }) {
+export default function Delete({
+	children,
+	post,
+	posts,
+	setPosts,
+}: {
+	children: React.ReactNode;
+	post: PostRelations;
+	posts: PostRelations[];
+	setPosts: any;
+}) {
 	const [opened, setOpened] = useState(false);
 	const [loading, setLoading] = useState(false);
 
@@ -15,13 +25,11 @@ export default function Delete({ children, data }: { children: React.ReactNode; 
 		try {
 			setLoading(true);
 
-			const response = await removePost(data);
-
-			const res = await response.json();
+			const res = await removePost(post);
 
 			if (!res) {
 				notifications.show({
-					id: `post-${data.id}-delete-failed-no-response`,
+					id: `post-${post.id}-delete-failed-no-response`,
 					icon: <IconX size={16} stroke={1.5} />,
 					autoClose: 5000,
 					title: "Server Unavailable",
@@ -29,21 +37,31 @@ export default function Delete({ children, data }: { children: React.ReactNode; 
 					variant: "failed",
 				});
 			} else {
-				if (!res.user.exists) {
+				if (!res.post.exists) {
 					notifications.show({
-						id: `post-${data.id}-delete-failed-not-found`,
+						id: `post-${post.id}-delete-failed-not-found`,
 						icon: <IconX size={16} stroke={1.5} />,
 						autoClose: 5000,
-						title: "User Not Found",
-						message: `No user with that email exists.`,
+						title: "Post Not Found",
+						message: `The post does not exist.`,
 						variant: "failed",
 					});
 				} else {
+					// update parent state
+					setPosts(
+						posts?.filter(p => {
+							const key = `${post.title}-${post.user.id}`;
+							const keySelected = `${p.title}-${p.user.id}`;
+
+							return key != keySelected;
+						})!
+					);
+
 					notifications.show({
-						id: `post-${data.id}-delete-success`,
+						id: `post-${post.id}-delete-success`,
 						icon: <IconCheck size={16} stroke={1.5} />,
 						autoClose: 5000,
-						title: "User Deleted",
+						title: "Post Deleted",
 						message: `Post has been deleted.`,
 						variant: "success",
 					});
@@ -51,7 +69,7 @@ export default function Delete({ children, data }: { children: React.ReactNode; 
 			}
 		} catch (error) {
 			notifications.show({
-				id: `post-${data.id}-delete-failed`,
+				id: `post-${post.id}-delete-failed`,
 				icon: <IconX size={16} stroke={1.5} />,
 				autoClose: 5000,
 				title: "Unexpected Error",
@@ -66,16 +84,16 @@ export default function Delete({ children, data }: { children: React.ReactNode; 
 
 	return (
 		<>
-			<Modal opened={opened} onClose={() => setOpened(false)} title={`Delete ${data.title}`} centered>
+			<Modal opened={opened} onClose={() => setOpened(false)} title={`Delete Post`} centered>
 				<Stack>
-					<Text size="sm">Are you sure you want to permanently delete the post ({data.title})?</Text>
+					<Text size="sm">Are you sure you want to permanently delete the selected post?</Text>
 
-					<Group justify="end">
+					<Group justify="end" mt={"md"}>
 						<Button size="xs" variant="outline" onClick={() => setOpened(false)}>
 							Cancel
 						</Button>
 						<Button size="xs" color="red" onClick={handleDelete} loading={loading}>
-							Delete
+							Delete Post
 						</Button>
 					</Group>
 				</Stack>

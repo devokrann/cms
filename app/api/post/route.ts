@@ -55,9 +55,9 @@ export async function DELETE(req: Request) {
 			return Response.json({ post: { exists: false } });
 		} else {
 			// delete post
-			await prisma.post.delete({ where: { id: post.id } });
+			const postDelete = await prisma.post.delete({ where: { id: post.id } });
 
-			return Response.json({ post: { exists: true } });
+			return Response.json({ post: { exists: true, post: postDelete } });
 		}
 	} catch (error) {
 		console.error("x-> Error deleting post:", error);

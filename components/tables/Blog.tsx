@@ -24,6 +24,7 @@ import {
 	TableThead,
 	TableTr,
 	Text,
+	Tooltip,
 } from "@mantine/core";
 
 import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
@@ -36,6 +37,8 @@ import { getPosts, removePosts } from "@/handlers/database/posts";
 import { enumSort } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import { PostRelations } from "@/types/model/post";
+
+import ModalsPostDelete from "../modals/post/Delete";
 
 interface typeSortObject {
 	order: enumSort;
@@ -75,7 +78,15 @@ export default function Blog() {
 		if (posts) {
 			const chunkedPosts = chunkPosts(posts!, Number(divisor));
 
-			setItems(chunkedPosts[activePage - 1].map(item => item));
+			if (chunkedPosts[activePage - 1]) {
+				setItems(chunkedPosts[activePage - 1].map(item => item));
+			} else {
+				if (activePage > 1) {
+					setPage(activePage - 1);
+				} else {
+					setItems([]);
+				}
+			}
 		}
 	}, [posts, activePage, divisor]);
 
@@ -266,6 +277,18 @@ export default function Blog() {
 		</TableTr>
 	);
 
+	const emptyRow = (
+		<TableTr>
+			<TableTd colSpan={10}>
+				<Group justify="center" my={"xl"}>
+					<Text component="span" inherit ta={"center"}>
+						No Posts Found
+					</Text>
+				</Group>
+			</TableTd>
+		</TableTr>
+	);
+
 	const rows = items?.map(post => {
 		const key = `${post.title}-${post.user.id}`;
 
@@ -308,11 +331,13 @@ export default function Blog() {
 
 				<TableTd w={tableWidths.delete}>
 					<Center>
-						{/* <ModalUserDelete data={user}> */}
-						<ActionIcon color="red" variant="light">
-							<IconTrash size={16} stroke={1.5} />
-						</ActionIcon>
-						{/* </ModalUserDelete> */}
+						<ModalsPostDelete post={post} posts={posts!} setPosts={setPosts}>
+							<Tooltip withArrow label="Delete post">
+								<ActionIcon color="red" variant="light">
+									<IconTrash size={16} stroke={1.5} />
+								</ActionIcon>
+							</Tooltip>
+						</ModalsPostDelete>
 					</Center>
 				</TableTd>
 			</TableTr>
@@ -390,7 +415,24 @@ export default function Blog() {
 				<Table verticalSpacing={"sm"} classNames={{ thead: classes.thead, caption: classes.caption }}>
 					<TableThead tt={"uppercase"} fz={"xs"}>
 						<TableTr>
-							<TableTh />
+							<TableTh w={tableWidths.check}>
+								<Center>
+									{!posts ? (
+										<Skeleton h={16} w={16} />
+									) : (
+										<Checkbox
+											size="xs"
+											aria-label="Select row"
+											checked={posts?.length != 0 && selectedRows.length == posts?.length}
+											onChange={event =>
+												setSelectedRows(
+													event.currentTarget.checked ? posts?.map(p => p.id)! : []
+												)
+											}
+										/>
+									)}
+								</Center>
+							</TableTh>
 
 							<TableTh>
 								<Group gap={"xs"}>
@@ -432,7 +474,9 @@ export default function Blog() {
 						</TableTr>
 					</TableThead>
 
-					<TableTbody>{!posts ? [skeletonRow, skeletonRow, skeletonRow] : rows}</TableTbody>
+					<TableTbody>
+						{!posts ? [skeletonRow, skeletonRow, skeletonRow] : posts.length > 0 ? rows : emptyRow}
+					</TableTbody>
 
 					<TableCaption>
 						<Group justify="space-between">
