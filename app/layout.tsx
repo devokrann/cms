@@ -31,8 +31,6 @@ import { SessionProvider } from "next-auth/react";
 
 import { auth } from "@/auth";
 
-import AffixTheme from "@/components/affixi/Theme";
-
 const noto = Noto_Sans_Display({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -66,7 +64,6 @@ export default async function App({
 					</ModalsProvider>
 
 					<Notifications limit={3} position="top-center" />
-					<AffixTheme />
 				</MantineProvider>
 
 				<SpeedInsights />

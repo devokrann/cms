@@ -1,12 +1,12 @@
 import React from "react";
 
-import LayoutBody from "@/layouts/Body";
+import LayoutShell from "@/layouts/Shell";
+import HeroMain from "@/layouts/heros/Main";
 import FooterMain from "@/partials/footers/Main";
-import HeaderMain from "@/partials/headers/Main";
-import AsideLeft from "@/partials/asides/Left";
 
 import { Metadata } from "next";
 import contact from "@/data/contact";
+import { Box, Stack } from "@mantine/core";
 
 export const metadata: Metadata = { title: { default: `Dashboard`, template: `%s - ${contact.name.app}` } };
 
@@ -16,12 +16,16 @@ export default function LayoutDashboard({
 	children: React.ReactNode;
 }) {
 	return (
-		<LayoutBody
-			header={<HeaderMain />}
-			aside={{ left: { component: <AsideLeft />, withBorder: true, width: { md: 25, lg: 17.5 } }, gap: "md" }}
-			footer={<FooterMain />}
-		>
-			<main>{children}</main>
-		</LayoutBody>
+		<LayoutShell>
+			<Box>
+				<Stack p={"md"} gap={"xl"}>
+					<HeroMain />
+
+					{children}
+				</Stack>
+
+				<FooterMain />
+			</Box>
+		</LayoutShell>
 	);
 }

@@ -4,12 +4,11 @@ import { Text } from "@mantine/core";
 
 import LayoutSection from "@/layouts/Section";
 
-import classes from "./Main.module.scss";
 import contact from "@/data/contact";
 
 export default function Main() {
 	return (
-		<LayoutSection padded="lg" className={classes.footer}>
+		<LayoutSection padded="md" style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
 			<Text fz={{ base: "xs", lg: "sm" }} ta={"center"}>
 				<Text component="span" inherit>
 					© {new Date().getFullYear()} {contact.name.app}

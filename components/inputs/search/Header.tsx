@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { Text, TextInput } from "@mantine/core";
+import { ActionIcon, Text, TextInput } from "@mantine/core";
 import { Spotlight, SpotlightActionData, spotlight } from "@mantine/spotlight";
 import { IconBlockquote, IconDashboard, IconSearch, IconUser } from "@tabler/icons-react";
 
