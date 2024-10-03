@@ -41,14 +41,14 @@ import {
 import { enumSort, enumUserStatus } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import ModalUserDelete from "../modals/user/Delete";
-import InputSearchUser from "@/components/inputs/search/User";
+import InputSearchText from "../inputs/search/Text";
 import { capitalizeWord, linkify } from "@/handlers/parsers/string";
 import Link from "next/link";
 import { getUsers } from "@/handlers/database/users";
 import { UserRelations } from "@/types/model/user";
 import ModalUserDeactivate from "../modals/user/Deactivate";
 import ModalUserActivate from "../modals/user/Activate";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface typeSortObject {
 	order: enumSort;
@@ -64,26 +64,33 @@ enum enumTableUsers {
 }
 
 export default function Users() {
-	// const searchParams = useSearchParams();
+	const searchParams = useSearchParams();
+	const paramName = searchParams.get("search");
 
-	// const paramName = searchParams.get("name");
-
-	// useEffect(() => {
-	// 	if (paramName) {
-	// 		setItems(users?.filter(i => linkify(i.name!)?.includes(linkify(paramName)))!);
-	// 	}
-	// }, [paramName]);
-
+	const [search, setSearch] = useState<string | null>(paramName);
 	const [users, setUsers] = useState<UserRelations[] | null>(null);
 
 	useEffect(() => {
 		const fetchUsers = async () => {
 			const result = await getUsers();
-			setUsers(result);
+
+			if (paramName) {
+				setUsers(
+					result?.filter((i: UserRelations) => {
+						return (
+							linkify(i.name!)?.includes(linkify(paramName.trim())) ||
+							linkify(i.email)?.includes(linkify(paramName.trim()))
+						);
+					})!
+				);
+			} else {
+				setUsers(result);
+				setSearch("");
+			}
 		};
 
 		fetchUsers();
-	}, []);
+	}, [paramName]);
 
 	// paginate logic
 	const [activePage, setPage] = useState(1);
@@ -443,7 +450,11 @@ export default function Users() {
 						{!users ? (
 							<Skeleton h={28} w={240} />
 						) : (
-							<InputSearchUser size={"xs"} placeholder={"Search users..."} />
+							<InputSearchText
+								size={"xs"}
+								placeholder={"Search users by name, email..."}
+								value={search}
+							/>
 						)}
 
 						<Group gap={"xs"}>
