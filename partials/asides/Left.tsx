@@ -13,7 +13,7 @@ export default function Left() {
 	const pathname = usePathname();
 
 	return (
-		<LayoutSection padded="md" pos={"sticky"} top={0}>
+		<LayoutSection my={"md"}>
 			<Stack>
 				<Stack gap={"xs"}>
 					<Title order={2} fz={"md"}>

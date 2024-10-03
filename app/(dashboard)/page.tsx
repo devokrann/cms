@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Overview" };
 
 export default function Overview() {
 	return (
-		<LayoutPage my={"xl"}>
-			<LayoutSection margined="xl" containerized="responsive">
+		<LayoutPage>
+			<LayoutSection>
 				<Group justify="space-between">
 					<Title order={1} fz={"xl"}>
 						Overview
