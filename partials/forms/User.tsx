@@ -61,7 +61,7 @@ export default function User() {
 		capitalizeWord(enumUserRole.DEVELOPER),
 	];
 
-	const userStatus = [capitalizeWord(enumUserStatus.ACTIVE), capitalizeWord(enumUserStatus.SUSPENDED)];
+	const userStatus = [capitalizeWord(enumUserStatus.ACTIVE), capitalizeWord(enumUserStatus.INACTIVE)];
 
 	const form = useForm({
 		initialValues: {

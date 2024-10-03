@@ -1,4 +1,6 @@
 import prisma from "@/services/prisma";
+import { enumUserStatus } from "@/types/enums";
+import { UserGet } from "@/types/model/user";
 import hasher from "@/utilities/hasher";
 import { Role, Status } from "@prisma/client";
 
@@ -29,6 +31,31 @@ export async function POST(req: Request) {
 	}
 }
 
+export async function PUT(req: Request) {
+	try {
+		const { user, mode } = await req.json();
+
+		// query database for user
+		const userRecord = await prisma.user.findUnique({ where: { id: user.id } });
+
+		if (!userRecord) {
+			return Response.json({ user: { exists: false } });
+		} else {
+			if (mode == enumUserStatus.ACTIVE || mode == enumUserStatus.INACTIVE) {
+				// update user status
+				const userStatusUpdate = await updateUserStatus(user, mode);
+
+				return Response.json({ user: { exists: true, user: userStatusUpdate } });
+			}
+
+			return Response.json({ user: { exists: true } });
+		}
+	} catch (error) {
+		console.error("x-> Error updating user:", error);
+		return Response.error();
+	}
+}
+
 export async function DELETE(req: Request) {
 	try {
 		const userId = await req.json();
@@ -50,9 +77,6 @@ export async function DELETE(req: Request) {
 
 const createUser = async (fields: { role: Role; status: Status; email: string; password: string }) => {
 	try {
-		console.log(fields.role);
-		console.log(fields.status);
-
 		await prisma.user.create({
 			data: {
 				role: fields.role,
@@ -66,6 +90,17 @@ const createUser = async (fields: { role: Role; status: Status; email: string; p
 		});
 	} catch (error) {
 		console.error("x-> Error creating user:", (error as Error).message);
+		throw error;
+	}
+};
+
+const updateUserStatus = async (user: UserGet, mode: enumUserStatus) => {
+	try {
+		const result = await prisma.user.update({ where: { id: user.id }, data: { status: mode } });
+
+		return result;
+	} catch (error) {
+		console.error("x-> Error updating user status:", (error as Error).message);
 		throw error;
 	}
 };

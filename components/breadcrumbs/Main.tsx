@@ -8,7 +8,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 
 import classes from "./Main.module.scss";
 
-import { typeLink } from "@/types/link";
+import { Link as typeLink } from "@/types/link";
 
 export default function Main({ data }: { data: typeLink[] }) {
 	const active = (breadcrumb: typeLink) => data.indexOf(breadcrumb) == data.length - 1;

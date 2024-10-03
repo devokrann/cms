@@ -2,7 +2,7 @@ import React from "react";
 
 import { Box, Container } from "@mantine/core";
 
-import { typeSection } from "@/types/layout";
+import { Section as typeSection } from "@/types/layout";
 
 import classes from "./Section.module.scss";
 

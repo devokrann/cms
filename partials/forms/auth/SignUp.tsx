@@ -32,7 +32,7 @@ import password from "@/libraries/validators/special/password";
 
 import compare from "@/libraries/validators/special/compare";
 
-import { typeSignUp } from "@/types/form";
+import { SignUp as typeSignUp } from "@/types/form";
 
 import { signIn as authSignIn } from "next-auth/react";
 import { millToMinSec } from "@/handlers/parsers/number";

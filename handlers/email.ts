@@ -6,9 +6,9 @@ import TemplateEmailCodeForgot from "@/templates/email/code/Forgot";
 import TemplateEmailNofificationChanged from "@/templates/email/notification/Changed";
 import TemplateEmailContact from "@/templates/email/Contact";
 
-import { typeFormContact } from "@/types/form";
+import { Contact } from "@/types/form";
 
-export const sendGeneralInquiryEmail = async (formData: typeFormContact) => {
+export const sendGeneralInquiryEmail = async (formData: Contact) => {
 	// switch to 'resend.general' when your domain is configured
 	const { data, error } = await resend.onboarding.emails.send({
 		/**

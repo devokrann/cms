@@ -19,14 +19,14 @@ import {
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { typeCategory } from "@/types/category";
 import { addCategory, getCategories } from "@/handlers/database/categories";
 import { capitalizeWords } from "@/handlers/parsers/string";
+import { CategoryGet } from "@/types/model/category";
 
 export default function Blog({ hoistChange, label, placeholder, description, required, size, initialValue }: any) {
 	const [value, setValue] = useState<string | null>(initialValue);
 	const [loading, setLoading] = useState(false);
-	const [data, setData] = useState<typeCategory[]>([]);
+	const [data, setData] = useState<CategoryGet[]>([]);
 
 	const combobox = useCombobox({
 		onDropdownClose: () => combobox.resetSelectedOption(),
@@ -62,7 +62,7 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 
 			const value = capitalizeWords(search.trim());
 
-			const result = await addCategory(value);
+			const result = await addCategory({ title: value });
 
 			if (!result.category.exists) {
 				setData(prevData => [...prevData, result.category.category]);
@@ -157,7 +157,7 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 }
 
 function getAsyncData() {
-	return new Promise<typeCategory[]>(resolve => {
+	return new Promise<CategoryGet[]>(resolve => {
 		setTimeout(() => resolve(getCategories()), 0);
 	});
 }

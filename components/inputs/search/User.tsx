@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
 	Combobox,
@@ -19,13 +19,43 @@ import {
 	useCombobox,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { typeUser } from "@/types/user";
 import { getUsers } from "@/handlers/database/users";
+import { UserGet } from "@/types/model/user";
+import { useRouter } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function User({ hoistChange, label, placeholder, error, required, size, initialValue }: any) {
-	const [value, setValue] = useState<string | null>(initialValue);
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	// const paramName = searchParams.get("name");
+
+	// Get a new searchParams string by merging the current
+	// searchParams with a provided key/value pair
+	const createQueryString = useCallback(
+		(name: string, value: string) => {
+			const params = new URLSearchParams(searchParams.toString());
+			params.set(name, value);
+
+			return params.toString();
+		},
+		[searchParams]
+	);
+
+	const handleSortChange = (name: string) => {
+		router.push(pathname + "?" + createQueryString(name, search.trim().toLowerCase()));
+	};
+
+	const [value, setValue] = useState<string | null>(initialValue ? initialValue : "");
 	const [loading, setLoading] = useState(false);
-	const [data, setData] = useState<typeUser[]>([]);
+	const [data, setData] = useState<UserGet[]>([]);
+
+	useEffect(() => {
+		if (value) {
+			handleSortChange("name");
+		}
+	}, [value]);
 
 	const combobox = useCombobox({
 		onDropdownClose: () => combobox.resetSelectedOption(),
@@ -114,6 +144,7 @@ export default function User({ hoistChange, label, placeholder, error, required,
 					rightSection={<ComboboxChevron />}
 					rightSectionPointerEvents="none"
 					error={error}
+					w={280}
 				/>
 			</ComboboxTarget>
 
@@ -163,7 +194,7 @@ export default function User({ hoistChange, label, placeholder, error, required,
 }
 
 function getAsyncData() {
-	return new Promise<typeUser[]>(resolve => {
+	return new Promise<UserGet[]>(resolve => {
 		setTimeout(() => resolve(getUsers()), 0);
 	});
 }

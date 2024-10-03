@@ -1,15 +1,16 @@
 import prisma from "@/services/prisma";
+import { CategoryCreate, CategoryGet } from "@/types/model/category";
 
 export async function POST(req: Request) {
 	try {
-		const categoryTitle = await req.json();
+		const category: CategoryCreate = await req.json();
 
 		// query database for category
-		const categoryRecord = await prisma.category.findUnique({ where: { title: categoryTitle } });
+		const categoryRecord = await prisma.category.findUnique({ where: { title: category.title } });
 
 		if (!categoryRecord) {
 			// create category
-			const createCategory = await prisma.category.create({ data: { title: categoryTitle } });
+			const createCategory = await prisma.category.create({ data: { title: category.title } });
 
 			return Response.json({ category: { exists: false, category: createCategory } });
 		} else {
@@ -23,16 +24,16 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
 	try {
-		const categoryTitle = await req.json();
+		const category: CategoryGet = await req.json();
 
 		// query database for category
-		const categoryRecord = await prisma.category.findUnique({ where: { title: categoryTitle } });
+		const categoryRecord = await prisma.category.findUnique({ where: { title: category.title } });
 
 		if (!categoryRecord) {
 			return Response.json({ category: { exists: false } });
 		} else {
 			// delete category
-			await prisma.category.delete({ where: { title: categoryTitle } });
+			await prisma.category.delete({ where: { title: category.title } });
 
 			return Response.json({ category: { exists: true } });
 		}

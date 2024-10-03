@@ -51,6 +51,9 @@ const contact = {
 			link: "#",
 		},
 	],
+	externalLinks: {
+		gdpr: "https://gdpr-info.eu/",
+	},
 };
 
 export default contact;

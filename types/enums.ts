@@ -1,3 +1,8 @@
+export enum enumDateType {
+	PAST = "past",
+	FUTURE = "future",
+}
+
 export enum enumSort {
 	ASCENDING = "ASCENDING",
 	DESCENDING = "DESCENDING",
@@ -19,5 +24,5 @@ export enum enumUserRole {
 
 export enum enumUserStatus {
 	ACTIVE = "ACTIVE",
-	SUSPENDED = "SUSPENDED",
+	INACTIVE = "INACTIVE",
 }

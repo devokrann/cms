@@ -2,7 +2,7 @@
 
 import { addTag, getTags } from "@/handlers/database/tags";
 import { capitalizeWords } from "@/handlers/parsers/string";
-import { typeTag } from "@/types/tag";
+import { TagGet } from "@/types/model/tag";
 import { Button, MultiSelect } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ export default function Blog({ label, description, placeholder, hoistChange, ini
 
 			const value = searchValue.trim().toLowerCase();
 
-			const addTagRecord = await addTag(value);
+			const addTagRecord = await addTag({ title: value });
 
 			setTagOptions([
 				...tagOptions,
@@ -46,7 +46,7 @@ export default function Blog({ label, description, placeholder, hoistChange, ini
 			const result = await getTags();
 
 			setTagOptions(
-				result.map((t: typeTag) => {
+				result.map((t: TagGet) => {
 					return { label: capitalizeWords(t.title), value: t.title };
 				})
 			);

@@ -1,4 +1,4 @@
-export interface typeMail {
+export interface Mail {
 	from?: string;
 	to: string;
 	subject: string;
