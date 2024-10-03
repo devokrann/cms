@@ -312,10 +312,10 @@ export default function Users() {
 	const tableWidths = {
 		check: { md: "5%", lg: "5%" },
 		name: { md: "20%", lg: "20%" },
-		email: { md: "25%", lg: "25%" },
+		email: { md: "20%", lg: "20%" },
 		status: { md: "15%", lg: "15%" },
 		created: { md: "15%", lg: "15%" },
-		actions: { md: "10%", lg: "10%" },
+		actions: { md: "15%", lg: "15%" },
 	};
 
 	const rows = items?.map(user => (
@@ -337,12 +337,26 @@ export default function Users() {
 				</Center>
 			</TableTd>
 
-			<TableTd w={tableWidths.name}>{user.name}</TableTd>
+			<TableTd w={tableWidths.name}>
+				<Tooltip label={user.name} withArrow position="top-start" fz={"xs"}>
+					<Text component="span" inherit lineClamp={1}>
+						{user.name}
+					</Text>
+				</Tooltip>
+			</TableTd>
 
 			<TableTd w={tableWidths.email}>
-				<Anchor inherit component={Link} href={`/listings/users/${user.id}`} underline="always">
-					{user.email}
-				</Anchor>
+				<Tooltip label={user.email} withArrow position="top-start" fz={"xs"}>
+					<Anchor
+						inherit
+						component={Link}
+						href={`/listings/users/${user.id}`}
+						underline="always"
+						lineClamp={1}
+					>
+						{user.email}
+					</Anchor>
+				</Tooltip>
 			</TableTd>
 
 			<TableTd w={tableWidths.status}>
@@ -354,7 +368,7 @@ export default function Users() {
 			<TableTd w={tableWidths.created}>{parseDateYmd(user.createdAt!)}</TableTd>
 
 			<TableTd w={tableWidths.actions}>
-				<Group gap={"xs"}>
+				<Group gap={"xs"} justify="center">
 					{user.status == "INACTIVE" ? (
 						<ModalUserActivate
 							selection={user}
@@ -407,7 +421,9 @@ export default function Users() {
 	const skeletonRow = (
 		<TableTr>
 			<TableTd w={tableWidths.check}>
-				<Skeleton h={16} w={16} my={4} />
+				<Center>
+					<Skeleton h={16} w={16} my={4} />
+				</Center>
 			</TableTd>
 			<TableTd w={tableWidths.name}>
 				<Skeleton h={12} w={"80%"} my={4} />
@@ -422,7 +438,7 @@ export default function Users() {
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
 			<TableTd w={tableWidths.actions}>
-				<Group gap={"xs"}>
+				<Group gap={"xs"} justify="center">
 					<Skeleton h={24} w={24} my={4} />
 					<Skeleton h={24} w={24} my={4} />
 				</Group>
@@ -585,6 +601,8 @@ export default function Users() {
 
 					<TableTbody>
 						{!users ? [skeletonRow, skeletonRow, skeletonRow] : users.length > 0 ? rows : emptyRow}
+
+						{skeletonRow}
 					</TableTbody>
 
 					<TableCaption>
