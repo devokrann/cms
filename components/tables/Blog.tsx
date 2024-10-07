@@ -36,7 +36,7 @@ import { enumSort } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import { PostRelations } from "@/types/model/post";
 
-import InputSearchText from "../inputs/search/Text";
+// import InputSearchText from "../inputs/search/Text";
 import ModalsPostDelete from "../modals/post/Delete";
 import { useSearchParams } from "next/navigation";
 import { linkify } from "@/handlers/parsers/string";
@@ -392,7 +392,7 @@ export default function Blog() {
 			<Card withBorder shadow="xs" padding={"xs"} style={{ overflow: "unset" }}>
 				<Stack>
 					<Group justify="space-between">
-						{!posts ? (
+						{/* {!posts ? (
 							<Skeleton h={28} w={240} />
 						) : (
 							<InputSearchText
@@ -400,7 +400,7 @@ export default function Blog() {
 								placeholder={"Search posts by title, user name..."}
 								value={search}
 							/>
-						)}
+						)} */}
 
 						<Group gap={"xs"}>
 							{!posts ? (
