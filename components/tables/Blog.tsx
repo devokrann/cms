@@ -29,8 +29,6 @@ import {
 
 import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
 
-import InputSearchBlog from "@/components/inputs/search/Blog";
-
 import classes from "./Blog.module.scss";
 
 import { getPosts, removePosts } from "@/handlers/database/posts";
@@ -38,7 +36,10 @@ import { enumSort } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import { PostRelations } from "@/types/model/post";
 
+// import InputSearchText from "../inputs/search/Text";
 import ModalsPostDelete from "../modals/post/Delete";
+import { useSearchParams } from "next/navigation";
+import { linkify } from "@/handlers/parsers/string";
 
 interface typeSortObject {
 	order: enumSort;
@@ -53,16 +54,33 @@ enum enumTablePosts {
 }
 
 export default function Blog() {
+	const searchParams = useSearchParams();
+	const paramName = searchParams.get("search");
+
+	const [search, setSearch] = useState<string | null>(paramName);
 	const [posts, setPosts] = useState<PostRelations[] | null>(null);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
 			const result = await getPosts();
-			setPosts(result);
+
+			if (paramName) {
+				setPosts(
+					result?.filter((p: PostRelations) => {
+						return (
+							linkify(p.title)?.includes(linkify(paramName.trim())) ||
+							linkify(p.user.name!)?.includes(linkify(paramName.trim()))
+						);
+					})!
+				);
+			} else {
+				setPosts(result);
+				setSearch("");
+			}
 		};
 
 		fetchPosts();
-	}, []);
+	}, [paramName]);
 
 	// paginate logic
 	const [activePage, setPage] = useState(1);
@@ -257,7 +275,9 @@ export default function Blog() {
 	const skeletonRow = (
 		<TableTr>
 			<TableTd>
-				<Skeleton h={16} w={16} my={4} />
+				<Center>
+					<Skeleton h={16} w={16} my={4} />
+				</Center>
 			</TableTd>
 			<TableTd>
 				<Skeleton h={12} w={"80%"} my={4} />
@@ -269,10 +289,12 @@ export default function Blog() {
 				<Skeleton h={12} w={"80%"} my={4} />
 			</TableTd>
 			<TableTd>
-				<Skeleton h={12} w={"50%"} my={4} />
+				<Skeleton h={12} w={{ lg: "50%" }} my={4} />
 			</TableTd>
 			<TableTd>
-				<Skeleton h={24} w={24} my={4} />
+				<Center>
+					<Skeleton h={24} w={24} my={4} />
+				</Center>
 			</TableTd>
 		</TableTr>
 	);
@@ -290,23 +312,23 @@ export default function Blog() {
 	);
 
 	const rows = items?.map(post => {
-		const key = `${post.title}-${post.user.id}`;
-
 		return (
-			<TableTr key={key} bg={selectedRows.includes(key) ? "var(--mantine-color-gray-1)" : undefined}>
+			<TableTr key={post.id} bg={selectedRows.includes(post.id) ? "var(--mantine-color-gray-1)" : undefined}>
 				<Table.Td w={tableWidths.check}>
-					<Checkbox
-						size="xs"
-						aria-label="Select row"
-						checked={selectedRows.includes(key)}
-						onChange={event =>
-							setSelectedRows(
-								event.currentTarget.checked
-									? [...selectedRows, key]
-									: selectedRows.filter(position => position !== key)
-							)
-						}
-					/>
+					<Center>
+						<Checkbox
+							size="xs"
+							aria-label="Select row"
+							checked={selectedRows.includes(post.id)}
+							onChange={event =>
+								setSelectedRows(
+									event.currentTarget.checked
+										? [...selectedRows, post.id]
+										: selectedRows.filter(position => position !== post.id)
+								)
+							}
+						/>
+					</Center>
 				</Table.Td>
 
 				<TableTd w={tableWidths.title}>
@@ -370,11 +392,15 @@ export default function Blog() {
 			<Card withBorder shadow="xs" padding={"xs"} style={{ overflow: "unset" }}>
 				<Stack>
 					<Group justify="space-between">
-						{!posts ? (
+						{/* {!posts ? (
 							<Skeleton h={28} w={240} />
 						) : (
-							<InputSearchBlog size={"xs"} placeholder={"Search posts..."} />
-						)}
+							<InputSearchText
+								size={"xs"}
+								placeholder={"Search posts by title, user name..."}
+								value={search}
+							/>
+						)} */}
 
 						<Group gap={"xs"}>
 							{!posts ? (
@@ -476,6 +502,8 @@ export default function Blog() {
 
 					<TableTbody>
 						{!posts ? [skeletonRow, skeletonRow, skeletonRow] : posts.length > 0 ? rows : emptyRow}
+
+						{skeletonRow}
 					</TableTbody>
 
 					<TableCaption>

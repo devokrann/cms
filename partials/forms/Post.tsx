@@ -17,16 +17,7 @@ import InputSearchUser from "@/components/inputs/search/User";
 import InputTagBlog from "@/components/inputs/tag/Blog";
 import InputContentBlog from "@/components/inputs/content/Blog";
 import InputCategoryBlog from "@/components/inputs/category/Blog";
-
-interface typeFormPost {
-	title: string;
-	content: string;
-	category: string;
-	createdAt: Date;
-
-	author: string;
-	tags: string[];
-}
+import { PostRelations } from "@/types/model/post";
 
 export default function Post() {
 	// Step 1: Manage the input value state
@@ -57,26 +48,33 @@ export default function Post() {
 			content: "",
 			createdAt: new Date(),
 
-			author: "",
-			category: "",
+			userId: "",
+			categoryId: "",
 			tags: [""],
 		},
 
 		validate: {
 			title: hasLength({ min: 2, max: 120 }, "Between 2 and 120 characters"),
-			author: hasLength({ min: 2, max: 64 }, "Select an author"),
+			userId: hasLength({ min: 2, max: 64 }, "Select an author"),
 		},
 	});
 
-	const parse = (rawData: typeFormPost) => {
+	const parse = () => {
 		return {
-			title: rawData.title.trim(),
-			content: rawData.content,
-			createdAt: rawData.createdAt,
+			title: form.values.title.trim(),
+			content: form.values.content,
+			createdAt: form.values.createdAt,
 
-			author: rawData.author,
-			category: rawData.category == "clear" ? "" : rawData.category,
-			tags: rawData.tags[0] == "clear" ? [""] : rawData.tags,
+			userId: form.values.userId,
+			categoryId: form.values.categoryId == "clear" ? "" : form.values.categoryId,
+			tags:
+				form.values.tags.map((t: string) => {
+					return { title: t };
+				})[0].title == "clear"
+					? []
+					: form.values.tags.map(t => {
+							return { title: t };
+					  }),
 		};
 	};
 
@@ -99,7 +97,7 @@ export default function Post() {
 
 					const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
 						method: enumRequest.POST,
-						body: JSON.stringify(parse(form.values)),
+						body: JSON.stringify(parse()),
 						headers: {
 							"Content-Type": "application/json",
 							Accept: "application/json",
@@ -166,8 +164,8 @@ export default function Post() {
 	};
 
 	useEffect(() => {
-		if (userId !== form.values.author) {
-			form.setFieldValue("author", userId);
+		if (userId !== form.values.userId) {
+			form.setFieldValue("userId", userId);
 			// form.validate(); // Trigger form validation after updating
 		}
 	}, [userId]);
@@ -187,8 +185,8 @@ export default function Post() {
 	}, [postContent]);
 
 	useEffect(() => {
-		if (postCategory !== form.values.category) {
-			form.setFieldValue("category", postCategory);
+		if (postCategory !== form.values.categoryId) {
+			form.setFieldValue("categoryId", postCategory);
 			// form.validate(); // Trigger form validation after updating
 		}
 	}, [postCategory]);
@@ -214,7 +212,7 @@ export default function Post() {
 											label={"Author"}
 											placeholder={"Post Author"}
 											hoistChange={handleUserChange}
-											{...form.getInputProps("author")}
+											{...form.getInputProps("userId")}
 											required
 											initialValue={userId}
 											autoComplete="off"
@@ -252,7 +250,7 @@ export default function Post() {
 										description="Search a category or enter new"
 										placeholder="Post Category"
 										hoistChange={handleCategoryChange}
-										{...form.getInputProps("category")}
+										{...form.getInputProps("categoryId")}
 										initialValue={postCategory}
 										autoComplete="off"
 									/>

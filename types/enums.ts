@@ -26,3 +26,11 @@ export enum enumUserStatus {
 	ACTIVE = "ACTIVE",
 	INACTIVE = "INACTIVE",
 }
+
+export enum enumTableUsers {
+	NAME = "NAME",
+	EMAIL = "EMAIL",
+	ROLE = "ROLE",
+	STATUS = "STATUS",
+	CREATED = "CREATED",
+}

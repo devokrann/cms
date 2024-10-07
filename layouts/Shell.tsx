@@ -32,7 +32,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 			layout="default"
 			header={{ height: { base: 60 }, collapsed: !pinned }}
 			navbar={{
-				width: { sm: 280 },
+				width: { sm: 240, md: 280 },
 				breakpoint: "sm",
 				collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
 			}}
