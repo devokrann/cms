@@ -5,10 +5,12 @@ import React from "react";
 import {
 	ActionIcon,
 	Anchor,
+	Avatar,
 	Center,
 	Checkbox,
 	Group,
 	Skeleton,
+	Stack,
 	Table,
 	TableTbody,
 	TableTd,
@@ -31,6 +33,7 @@ import ModalUserDeactivate from "../modals/user/Deactivate";
 import { useSortUsers } from "@/hooks/sort";
 import BadgeUserStatus from "../badges/UserStatus";
 import ActionIconSort from "../action-icon/Sort";
+import { initialize } from "@/handlers/parsers/string";
 
 export default function Users({
 	users,
@@ -76,11 +79,23 @@ export default function Users({
 			</TableTd>
 
 			<TableTd w={tableWidths.name}>
-				<Tooltip label={user.name} withArrow position="top-start" fz={"xs"}>
-					<Text component="span" inherit lineClamp={1}>
-						{user.name}
-					</Text>
-				</Tooltip>
+				<Group gap={"xs"} wrap="nowrap">
+					{!user.image ? (
+						<Anchor inherit component={Link} href={`/listings/users/${user.id}`} underline="never">
+							<Avatar>{initialize(user.name!)}</Avatar>
+						</Anchor>
+					) : (
+						<Anchor inherit component={Link} href={`/listings/users/${user.id}`} underline="never">
+							<Avatar src={user.image} alt={user.name!} />
+						</Anchor>
+					)}
+
+					<Tooltip label={user.name} withArrow position="top-start" fz={"xs"}>
+						<Text component="span" inherit lineClamp={1}>
+							{user.name}
+						</Text>
+					</Tooltip>
+				</Group>
 			</TableTd>
 
 			<TableTd w={tableWidths.email}>
@@ -89,7 +104,7 @@ export default function Users({
 						inherit
 						component={Link}
 						href={`/listings/users/${user.id}`}
-						underline="always"
+						underline="hover"
 						lineClamp={1}
 					>
 						{user.email}
@@ -183,7 +198,7 @@ export default function Users({
 
 					<TableTh w={tableWidths.name}>
 						<Group gap={"xs"}>
-							<Text component="span" inherit>
+							<Text component="span" inherit fw={500}>
 								Name
 							</Text>
 
@@ -197,7 +212,7 @@ export default function Users({
 
 					<TableTh w={tableWidths.email}>
 						<Group gap={"xs"}>
-							<Text component="span" inherit>
+							<Text component="span" inherit fw={500}>
 								Email
 							</Text>
 
@@ -211,7 +226,7 @@ export default function Users({
 
 					<TableTh w={tableWidths.status}>
 						<Group gap={"xs"}>
-							<Text component="span" inherit>
+							<Text component="span" inherit fw={500}>
 								Status
 							</Text>
 
@@ -225,7 +240,7 @@ export default function Users({
 
 					<TableTh w={tableWidths.created}>
 						<Group gap={"xs"}>
-							<Text component="span" inherit>
+							<Text component="span" inherit fw={500}>
 								Created
 							</Text>
 

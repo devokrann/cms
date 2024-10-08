@@ -75,6 +75,7 @@ export default function Delete({
 					variant: "failed",
 				});
 			} finally {
+				form.reset();
 				setLoading(false);
 				setOpened(false);
 			}

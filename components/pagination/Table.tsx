@@ -1,14 +1,13 @@
-import { UserGet } from "@/types/model/user";
 import { Pagination } from "@mantine/core";
 import React from "react";
 
 export default function Table({
-	users,
+	list,
 	divisor,
 	activePage,
 	setActivePage,
 }: {
-	users: UserGet[];
+	list: any[];
 	divisor: string;
 	activePage: number;
 	setActivePage: any;
@@ -16,7 +15,7 @@ export default function Table({
 	return (
 		<Pagination
 			size={"sm"}
-			total={Math.ceil(users.length / Number(divisor))}
+			total={Math.ceil(list.length / Number(divisor))}
 			value={activePage}
 			onChange={setActivePage}
 			defaultValue={1}
