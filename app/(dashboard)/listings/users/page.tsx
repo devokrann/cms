@@ -172,7 +172,7 @@ export default function Users() {
 								</Group>
 							) : (
 								<PaginationTable
-									users={filteredUsers!}
+									list={filteredUsers!}
 									divisor={divisor!}
 									activePage={activePage}
 									setActivePage={setActivePage}

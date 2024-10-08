@@ -34,3 +34,10 @@ export enum enumTableUsers {
 	STATUS = "STATUS",
 	CREATED = "CREATED",
 }
+
+export enum enumTablePosts {
+	TITLE = "TITLE",
+	CATEGORY = "CATEGORY",
+	AUTHOR = "AUTHOR",
+	CREATED = "CREATED",
+}

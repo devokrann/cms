@@ -1,10 +1,9 @@
 "use client";
 
-import { UserRelations } from "@/types/model/user";
 import { useEffect, useState } from "react";
 
 export const usePaginate = (list: any[], divisor: string) => {
-	const [items, setItems] = useState<UserRelations[]>([]);
+	const [items, setItems] = useState<any[]>([]);
 	const [activePage, setActivePage] = useState(1);
 
 	useEffect(() => {
@@ -26,7 +25,7 @@ export const usePaginate = (list: any[], divisor: string) => {
 	return { items, setItems, activePage, setActivePage };
 };
 
-const chunkUsers = (array: UserRelations[], size: number): UserRelations[][] => {
+const chunkUsers = (array: any[], size: number): any[][] => {
 	if (!array.length) {
 		return [];
 	}

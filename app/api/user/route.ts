@@ -58,14 +58,14 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
 	try {
-		const userId = await req.json();
+		const { id } = await req.json();
 
-		const userRecord = await prisma.user.findUnique({ where: { id: userId } });
+		const userRecord = await prisma.user.findUnique({ where: { id } });
 
 		if (!userRecord) {
 			return Response.json({ user: { exists: false } });
 		} else {
-			await deleteUser(userId);
+			await deleteUser(id);
 
 			return Response.json({ user: { exists: true } });
 		}

@@ -57,7 +57,7 @@ export const updateUser = async (user: UserGet, mode: enumUserStatus) => {
 export const removeUser = async (user: UserGet) => {
 	try {
 		const response = await fetch(`${apiUrl}/user`, {
-			method: enumRequest.GET,
+			method: enumRequest.DELETE,
 			body: JSON.stringify(user),
 			headers,
 		});

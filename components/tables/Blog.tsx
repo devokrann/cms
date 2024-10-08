@@ -1,23 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import {
 	ActionIcon,
 	Badge,
-	Button,
-	Card,
 	Center,
 	Checkbox,
-	Divider,
 	Group,
-	NumberFormatter,
-	Pagination,
-	Select,
 	Skeleton,
 	Stack,
 	Table,
-	TableCaption,
 	TableTbody,
 	TableTd,
 	TableTh,
@@ -27,293 +20,44 @@ import {
 	Tooltip,
 } from "@mantine/core";
 
-import { IconChevronDown, IconChevronUp, IconSelector, IconTrash } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 
 import classes from "./Blog.module.scss";
 
-import { getPosts, removePosts } from "@/handlers/database/posts";
-import { enumSort } from "@/types/enums";
 import { parseDateYmd } from "@/handlers/parsers/date";
 import { PostRelations } from "@/types/model/post";
-
-// import InputSearchText from "../inputs/search/Text";
+import ActionIconSort from "../action-icon/Sort";
 import ModalsPostDelete from "../modals/post/Delete";
-import { useSearchParams } from "next/navigation";
-import { linkify } from "@/handlers/parsers/string";
+import { useSortBlog } from "@/hooks/sort";
+import { enumTablePosts } from "@/types/enums";
 
-interface typeSortObject {
-	order: enumSort;
-	button: React.ReactNode;
-}
-
-enum enumTablePosts {
-	TITLE = "TITLE",
-	CATEGORY = "CATEGORY",
-	AUTHOR = "AUTHOR",
-	CREATED = "CREATED",
-}
-
-export default function Blog() {
-	const searchParams = useSearchParams();
-	const paramName = searchParams.get("search");
-
-	const [search, setSearch] = useState<string | null>(paramName);
-	const [posts, setPosts] = useState<PostRelations[] | null>(null);
-
-	useEffect(() => {
-		const fetchPosts = async () => {
-			const result = await getPosts();
-
-			if (paramName) {
-				setPosts(
-					result?.filter((p: PostRelations) => {
-						return (
-							linkify(p.title)?.includes(linkify(paramName.trim())) ||
-							linkify(p.user.name!)?.includes(linkify(paramName.trim()))
-						);
-					})!
-				);
-			} else {
-				setPosts(result);
-				setSearch("");
-			}
-		};
-
-		fetchPosts();
-	}, [paramName]);
-
-	// paginate logic
-	const [activePage, setPage] = useState(1);
-	const [items, setItems] = useState<PostRelations[]>([]);
-
-	const divisors = [5, 10, 15, 20, 25];
-	const [divisor, setDivisor] = useState<string | null>(divisors[0].toString());
-	const divisorOptions = divisors.map(o => {
-		return { value: o.toString(), label: `Show ${o}` };
-	});
-
-	useEffect(() => {
-		if (posts) {
-			const chunkedPosts = chunkPosts(posts!, Number(divisor));
-
-			if (chunkedPosts[activePage - 1]) {
-				setItems(chunkedPosts[activePage - 1].map(item => item));
-			} else {
-				if (activePage > 1) {
-					setPage(activePage - 1);
-				} else {
-					setItems([]);
-				}
-			}
-		}
-	}, [posts, activePage, divisor]);
-
-	// sorting logic
-	const getSortButtons = (field: enumTablePosts) => {
-		return {
-			ascending: (
-				<ActionIcon size={16} variant="light" onClick={() => sortItems(field)}>
-					<IconChevronUp size={16} stroke={1.5} />
-				</ActionIcon>
-			),
-			descending: (
-				<ActionIcon size={16} variant="light" onClick={() => sortItems(field)}>
-					<IconChevronDown size={16} stroke={1.5} />
-				</ActionIcon>
-			),
-			default: (
-				<ActionIcon size={16} variant="light" onClick={() => sortItems(field)}>
-					<IconSelector size={16} stroke={1.5} />
-				</ActionIcon>
-			),
-		};
-	};
-
-	const [titleOrder, setTitleOrder] = useState<typeSortObject>({
-		order: enumSort.DEFAULT,
-		button: getSortButtons(enumTablePosts.TITLE).default,
-	});
-	const [categoryOrder, setCategoryOrder] = useState<typeSortObject>({
-		order: enumSort.DEFAULT,
-		button: getSortButtons(enumTablePosts.CATEGORY).default,
-	});
-	const [authorOrder, setAuthorOrder] = useState<typeSortObject>({
-		order: enumSort.DEFAULT,
-		button: getSortButtons(enumTablePosts.AUTHOR).default,
-	});
-	const [createdOrder, setCreatedOrder] = useState<typeSortObject>({
-		order: enumSort.DEFAULT,
-		button: getSortButtons(enumTablePosts.CREATED).default,
-	});
-
-	const sortItems = (field: enumTablePosts) => {
-		switch (field) {
-			case enumTablePosts.TITLE:
-				setTitleOrder(prevTitleOrder => {
-					if (prevTitleOrder.order == enumSort.DEFAULT || prevTitleOrder.order == enumSort.DESCENDING) {
-						// Create a shallow copy of items and sort by 'title' ascending
-						setPosts(prevPosts => [...prevPosts!].sort((a, b) => a.title.localeCompare(b.title)));
-
-						return {
-							order: enumSort.ASCENDING,
-							button: getSortButtons(enumTablePosts.TITLE).ascending,
-						};
-					} else {
-						// Create a shallow copy of items and sort by 'title' descending
-						setPosts(prevPosts => [...prevPosts!].sort((a, b) => a.title.localeCompare(b.title)).reverse());
-
-						return {
-							order: enumSort.DESCENDING,
-							button: getSortButtons(enumTablePosts.TITLE).descending,
-						};
-					}
-				});
-				break;
-
-			case enumTablePosts.CATEGORY:
-				setCategoryOrder(prevCategoryOrder => {
-					if (prevCategoryOrder.order == enumSort.DEFAULT || prevCategoryOrder.order == enumSort.DESCENDING) {
-						// Create a shallow copy of items and sort by 'category' ascending
-						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => a.category?.title.localeCompare(b.category?.title!)!)
-						);
-
-						return {
-							order: enumSort.ASCENDING,
-							button: getSortButtons(enumTablePosts.CATEGORY).ascending,
-						};
-					} else {
-						// Create a shallow copy of items and sort by 'category' descending
-						setPosts(prevPosts =>
-							[...prevPosts!]
-								.sort((a, b) => a.category?.title.localeCompare(b.category?.title!)!)
-								.reverse()
-						);
-
-						return {
-							order: enumSort.DESCENDING,
-							button: getSortButtons(enumTablePosts.CATEGORY).descending,
-						};
-					}
-				});
-				break;
-
-			case enumTablePosts.AUTHOR:
-				setAuthorOrder(prevAuthorOrder => {
-					if (prevAuthorOrder.order == enumSort.DEFAULT || prevAuthorOrder.order == enumSort.DESCENDING) {
-						// Create a shallow copy of items and sort by 'author' ascending
-						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => a.user.name?.localeCompare(b.user.name!)!)
-						);
-
-						return {
-							order: enumSort.ASCENDING,
-							button: getSortButtons(enumTablePosts.AUTHOR).ascending,
-						};
-					} else {
-						// Create a shallow copy of items and sort by 'author' descending
-						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => a.user.name?.localeCompare(b.user.name!)!).reverse()
-						);
-
-						return {
-							order: enumSort.DESCENDING,
-							button: getSortButtons(enumTablePosts.AUTHOR).descending,
-						};
-					}
-				});
-				break;
-
-			case enumTablePosts.CREATED:
-				setCreatedOrder(prevCreatedOrder => {
-					if (prevCreatedOrder.order == enumSort.DEFAULT || prevCreatedOrder.order == enumSort.DESCENDING) {
-						// Create a shallow copy of items and sort by 'created at' ascending
-						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => {
-								const dateA = new Date(a.createdAt!); // Convert the string to a Date object
-								const dateB = new Date(b.createdAt!);
-								return dateA.getTime() - dateB.getTime(); // Sort by time value
-							})
-						);
-
-						return {
-							order: enumSort.ASCENDING,
-							button: getSortButtons(enumTablePosts.CREATED).ascending,
-						};
-					} else {
-						// Create a shallow copy of items and sort by 'created at' descending
-						setPosts(prevPosts =>
-							[...prevPosts!].sort((a, b) => {
-								const dateA = new Date(a.createdAt!); // Convert the string to a Date object
-								const dateB = new Date(b.createdAt!);
-								return dateB.getTime() - dateA.getTime(); // Sort by time value
-							})
-						);
-
-						return {
-							order: enumSort.DESCENDING,
-							button: getSortButtons(enumTablePosts.CREATED).descending,
-						};
-					}
-				});
-				break;
-		}
-	};
-
-	const [selectedRows, setSelectedRows] = useState<string[]>([]);
-	const active = selectedRows.length > 0;
-
-	const tableWidths = {
-		check: { md: "5%", lg: "5%" },
-		title: { md: "30%", lg: "30%" },
-		category: { md: "20%", lg: "20%" },
-		author: { md: "20%", lg: "20%" },
-		created: { md: "20%", lg: "20%" },
-		delete: { md: "5%", lg: "5%" },
-	};
-
-	const skeletonRow = (
-		<TableTr>
-			<TableTd>
-				<Center>
-					<Skeleton h={16} w={16} my={4} />
-				</Center>
-			</TableTd>
-			<TableTd>
-				<Skeleton h={12} w={"80%"} my={4} />
-			</TableTd>
-			<TableTd>
-				<Skeleton h={12} w={"50%"} my={4} />
-			</TableTd>
-			<TableTd>
-				<Skeleton h={12} w={"80%"} my={4} />
-			</TableTd>
-			<TableTd>
-				<Skeleton h={12} w={{ lg: "50%" }} my={4} />
-			</TableTd>
-			<TableTd>
-				<Center>
-					<Skeleton h={24} w={24} my={4} />
-				</Center>
-			</TableTd>
-		</TableTr>
-	);
-
-	const emptyRow = (
-		<TableTr>
-			<TableTd colSpan={10}>
-				<Group justify="center" my={"xl"}>
-					<Text component="span" inherit ta={"center"}>
-						No Posts Found
-					</Text>
-				</Group>
-			</TableTd>
-		</TableTr>
-	);
+export default function Blog({
+	posts,
+	setPosts,
+	items,
+	setItems,
+	selectedRows,
+	setSelectedRows,
+}: {
+	posts: PostRelations[] | null;
+	setPosts: any;
+	items: PostRelations[];
+	setItems: any;
+	selectedRows: string[];
+	setSelectedRows: any;
+}) {
+	const { sort, titleOrder, categoryOrder, authorOrder, createdOrder } = useSortBlog(setPosts);
 
 	const rows = items?.map(post => {
 		return (
-			<TableTr key={post.id} bg={selectedRows.includes(post.id) ? "var(--mantine-color-gray-1)" : undefined}>
+			<TableTr
+				key={post.id}
+				bg={
+					selectedRows.includes(post.id)
+						? "light-dark(var(--mantine-color-gray-1),var(--mantine-color-gray-light))"
+						: undefined
+				}
+			>
 				<Table.Td w={tableWidths.check}>
 					<Center>
 						<Checkbox
@@ -353,7 +97,12 @@ export default function Blog() {
 
 				<TableTd w={tableWidths.delete}>
 					<Center>
-						<ModalsPostDelete post={post} posts={posts!} setPosts={setPosts}>
+						<ModalsPostDelete
+							selection={post}
+							posts={posts!}
+							setPosts={setPosts}
+							setSelectedRows={setSelectedRows}
+						>
 							<Tooltip withArrow label="Delete post">
 								<ActionIcon color="red" variant="light">
 									<IconTrash size={16} stroke={1.5} />
@@ -366,189 +115,158 @@ export default function Blog() {
 		);
 	});
 
-	const handleDelete = async () => {
-		// remove posts from state
-		setPosts(
-			posts?.filter(p => {
-				const key = `${p.title}-${p.user.id}`;
-				return !selectedRows.includes(key);
-			})!
-		);
-
-		// delete posts from database
-		await removePosts(
-			posts?.filter(p => {
-				const key = `${p.title}-${p.user.id}`;
-				return selectedRows.includes(key);
-			})!
-		);
-
-		// reset selection
-		setSelectedRows([]);
-	};
-
 	return (
 		<Stack>
-			<Card withBorder shadow="xs" padding={"xs"} style={{ overflow: "unset" }}>
-				<Stack>
-					<Group justify="space-between">
-						{/* {!posts ? (
-							<Skeleton h={28} w={240} />
-						) : (
-							<InputSearchText
-								size={"xs"}
-								placeholder={"Search posts by title, user name..."}
-								value={search}
-							/>
-						)} */}
+			<Table verticalSpacing={"sm"} classNames={{ thead: classes.thead, caption: classes.caption }}>
+				<TableThead tt={"uppercase"} fz={"xs"}>
+					<TableTr>
+						<TableTh w={tableWidths.check}>
+							<Center>
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<Checkbox
+										size="xs"
+										aria-label="Select row"
+										checked={posts?.length != 0 && selectedRows.length == posts?.length}
+										onChange={event =>
+											setSelectedRows(event.currentTarget.checked ? posts?.map(p => p.id)! : [])
+										}
+									/>
+								)}
+							</Center>
+						</TableTh>
 
-						<Group gap={"xs"}>
-							{!posts ? (
-								<Skeleton h={28} w={120} />
-							) : (
-								<Select
-									size="xs"
-									w={120}
-									defaultValue={divisorOptions[0].value}
-									placeholder={divisorOptions[0].label}
-									data={divisorOptions}
-									value={divisor}
-									onChange={setDivisor}
-									allowDeselect={false}
-									withCheckIcon={false}
-								/>
-							)}
-
-							<Divider orientation="vertical" />
-
-							{!posts ? <Skeleton h={28} w={96} /> : <Button size="xs">Clear Filters</Button>}
-						</Group>
-					</Group>
-
-					<Group>
-						{!posts ? (
-							<Skeleton h={28} w={96} />
-						) : (
-							<Button size="xs" disabled={!active} color="red" variant="light" onClick={handleDelete}>
-								Delete ({selectedRows.length})
-							</Button>
-						)}
-					</Group>
-				</Stack>
-			</Card>
-
-			<Card withBorder padding={0} shadow="xs" c={"inherit"}>
-				<Table verticalSpacing={"sm"} classNames={{ thead: classes.thead, caption: classes.caption }}>
-					<TableThead tt={"uppercase"} fz={"xs"}>
-						<TableTr>
-							<TableTh w={tableWidths.check}>
-								<Center>
-									{!posts ? (
-										<Skeleton h={16} w={16} />
-									) : (
-										<Checkbox
-											size="xs"
-											aria-label="Select row"
-											checked={posts?.length != 0 && selectedRows.length == posts?.length}
-											onChange={event =>
-												setSelectedRows(
-													event.currentTarget.checked ? posts?.map(p => p.id)! : []
-												)
-											}
-										/>
-									)}
-								</Center>
-							</TableTh>
-
-							<TableTh>
-								<Group gap={"xs"}>
-									<Text component="span" inherit>
-										Title
-									</Text>
-									{titleOrder.button}
-								</Group>
-							</TableTh>
-
-							<TableTh>
-								<Group gap={"xs"}>
-									<Text component="span" inherit>
-										Category
-									</Text>
-									{categoryOrder.button}
-								</Group>
-							</TableTh>
-
-							<TableTh>
-								<Group gap={"xs"}>
-									<Text component="span" inherit>
-										Author
-									</Text>
-									{authorOrder.button}
-								</Group>
-							</TableTh>
-
-							<TableTh>
-								<Group gap={"xs"}>
-									<Text component="span" inherit>
-										Created On
-									</Text>
-									{createdOrder.button}
-								</Group>
-							</TableTh>
-
-							<TableTh />
-						</TableTr>
-					</TableThead>
-
-					<TableTbody>
-						{!posts ? [skeletonRow, skeletonRow, skeletonRow] : posts.length > 0 ? rows : emptyRow}
-
-						{skeletonRow}
-					</TableTbody>
-
-					<TableCaption>
-						<Group justify="space-between">
-							{!posts ? (
-								<Skeleton h={16} w={160} />
-							) : (
+						<TableTh>
+							<Group gap={"xs"}>
 								<Text component="span" inherit>
-									Showing <NumberFormatter thousandSeparator value={rows?.length} /> of{" "}
-									<NumberFormatter thousandSeparator value={posts?.length} /> posts
+									Title
 								</Text>
-							)}
 
-							{!posts ? (
-								<Group gap={"xs"}>
-									<Skeleton h={24} w={24} />
-									<Skeleton h={24} w={24} />
-									<Skeleton h={24} w={24} />
-									<Skeleton h={24} w={24} />
-									<Skeleton h={24} w={24} />
-								</Group>
-							) : (
-								<Pagination
-									size={"sm"}
-									total={Math.ceil(posts.length / Number(divisor))}
-									value={activePage}
-									onChange={setPage}
-									defaultValue={1}
-								/>
-							)}
-						</Group>
-					</TableCaption>
-				</Table>
-			</Card>
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<ActionIconSort
+										order={titleOrder}
+										sortFunction={() => sort(enumTablePosts.TITLE)}
+									/>
+								)}
+							</Group>
+						</TableTh>
+
+						<TableTh>
+							<Group gap={"xs"}>
+								<Text component="span" inherit>
+									Category
+								</Text>
+
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<ActionIconSort
+										order={categoryOrder}
+										sortFunction={() => sort(enumTablePosts.CATEGORY)}
+									/>
+								)}
+							</Group>
+						</TableTh>
+
+						<TableTh>
+							<Group gap={"xs"}>
+								<Text component="span" inherit>
+									Author
+								</Text>
+
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<ActionIconSort
+										order={authorOrder}
+										sortFunction={() => sort(enumTablePosts.AUTHOR)}
+									/>
+								)}
+							</Group>
+						</TableTh>
+
+						<TableTh>
+							<Group gap={"xs"}>
+								<Text component="span" inherit>
+									Created On
+								</Text>
+
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<ActionIconSort
+										order={createdOrder}
+										sortFunction={() => sort(enumTablePosts.CREATED)}
+									/>
+								)}
+							</Group>
+						</TableTh>
+
+						<TableTh />
+					</TableTr>
+				</TableThead>
+
+				<TableTbody>
+					{!posts
+						? Array(15)
+								.fill(0)
+								.map((_, index) => skeletonRow)
+						: posts.length > 0
+						? rows
+						: emptyRow}
+				</TableTbody>
+			</Table>
 		</Stack>
 	);
 }
 
-const chunkPosts = (array: PostRelations[], size: number): PostRelations[][] => {
-	if (!array.length) {
-		return [];
-	}
-
-	const head = array.slice(0, size);
-	const tail = array.slice(size);
-
-	return [head, ...chunkPosts(tail, size)];
+const tableWidths = {
+	check: { md: "5%", lg: "5%" },
+	title: { md: "30%", lg: "30%" },
+	category: { md: "20%", lg: "20%" },
+	author: { md: "20%", lg: "20%" },
+	created: { md: "20%", lg: "20%" },
+	delete: { md: "5%", lg: "5%" },
 };
+
+const skeletonRow = (
+	<TableTr>
+		<TableTd>
+			<Center>
+				<Skeleton h={16} w={16} my={4} />
+			</Center>
+		</TableTd>
+		<TableTd>
+			<Skeleton h={12} w={"80%"} my={4} />
+		</TableTd>
+		<TableTd>
+			<Skeleton h={12} w={"50%"} my={4} />
+		</TableTd>
+		<TableTd>
+			<Skeleton h={12} w={"80%"} my={4} />
+		</TableTd>
+		<TableTd>
+			<Skeleton h={12} w={{ lg: "50%" }} my={4} />
+		</TableTd>
+		<TableTd>
+			<Center>
+				<Skeleton h={24} w={24} my={4} />
+			</Center>
+		</TableTd>
+	</TableTr>
+);
+
+const emptyRow = (
+	<TableTr>
+		<TableTd colSpan={10}>
+			<Group justify="center" my={"xl"}>
+				<Text component="span" inherit ta={"center"}>
+					No Posts Found
+				</Text>
+			</Group>
+		</TableTd>
+	</TableTr>
+);
