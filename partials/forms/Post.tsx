@@ -50,7 +50,7 @@ export default function Post() {
 
 			userId: "",
 			categoryId: "",
-			tags: [""],
+			tags: [] as string[],
 		},
 
 		validate: {
@@ -68,7 +68,7 @@ export default function Post() {
 			userId: form.values.userId,
 			categoryId: form.values.categoryId == "clear" ? "" : form.values.categoryId,
 			tags:
-				form.values.tags.map((t: string) => {
+				form.values.tags.map(t => {
 					return { title: t };
 				})[0].title == "clear"
 					? []
@@ -79,14 +79,14 @@ export default function Post() {
 	};
 
 	const handleReset = () => {
-		// clear internal elements
-		form.reset();
-
 		// clear external elements
 		setUserId("clear");
 		setPostContent("clear");
 		setPostCategory("clear");
 		setPostTags(["clear"]);
+
+		// clear internal elements
+		form.reset();
 	};
 
 	const handleSubmit = async () => {

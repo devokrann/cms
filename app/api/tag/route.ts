@@ -2,14 +2,14 @@ import prisma from "@/services/prisma";
 
 export async function POST(req: Request) {
 	try {
-		const tagTitle = await req.json();
+		const { title } = await req.json();
 
 		// query database for tag
-		const tagRecord = await prisma.tag.findUnique({ where: { title: tagTitle } });
+		const tagRecord = await prisma.tag.findUnique({ where: { title } });
 
 		if (!tagRecord) {
 			// create tag
-			const createTag = await prisma.tag.create({ data: { title: tagTitle } });
+			const createTag = await prisma.tag.create({ data: { title } });
 
 			return Response.json({ tag: { exists: false, tag: createTag } });
 		} else {
