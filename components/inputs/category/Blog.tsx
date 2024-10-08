@@ -18,7 +18,7 @@ import {
 	Text,
 	useCombobox,
 } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { IconCategory, IconSearch } from "@tabler/icons-react";
 import { addCategory, getCategories } from "@/handlers/database/categories";
 import { capitalizeWords } from "@/handlers/parsers/string";
 import { CategoryGet } from "@/types/model/category";
@@ -113,8 +113,7 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 					label={label}
 					placeholder={placeholder}
 					description={description}
-					leftSection={<IconSearch size={16} stroke={1.5} />}
-					rightSection={<ComboboxChevron />}
+					leftSection={<IconCategory size={16} stroke={1.5} />}
 					rightSectionPointerEvents="none"
 				/>
 			</ComboboxTarget>
@@ -130,23 +129,15 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 							</ComboboxEmpty>
 						) : options.length > 0 ? (
 							options
+						) : search.trim().length > 0 ? (
+							<ComboboxOption onClick={updateCategories} value={search.trim().toLowerCase()}>
+								+ Create &apos;{capitalizeWords(search.trim())}&apos;
+							</ComboboxOption>
 						) : (
 							<Combobox.Empty>
-								{search.trim().length > 0 ? (
-									<Button
-										variant="light"
-										size="xs"
-										onClick={updateCategories}
-										loading={loading}
-										fw={"normal"}
-									>
-										Create &apos;{capitalizeWords(search.trim())}&apos;
-									</Button>
-								) : (
-									<Text component="span" inherit fz={"xs"}>
-										Nothing found...
-									</Text>
-								)}
+								<Text component="span" inherit fz={"xs"}>
+									Nothing found...
+								</Text>
 							</Combobox.Empty>
 						)}
 					</ScrollAreaAutosize>

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import {
+	Avatar,
 	Combobox,
 	ComboboxChevron,
 	ComboboxDropdown,
@@ -23,6 +24,7 @@ import { getUsers } from "@/handlers/database/users";
 import { UserGet } from "@/types/model/user";
 import { useRouter } from "next/navigation";
 import { usePathname, useSearchParams } from "next/navigation";
+import { initialize } from "@/handlers/parsers/string";
 
 export default function User({ hoistChange, label, placeholder, error, required, size, initialValue }: any) {
 	const [value, setValue] = useState<string | null>(initialValue ? initialValue : "");
@@ -67,7 +69,15 @@ export default function User({ hoistChange, label, placeholder, error, required,
 
 	const optionsName = filteredOptionsName.map(item => (
 		<ComboboxOption key={item.id} value={item.name!}>
-			{item.name}
+			<Group>
+				{!item.image ? (
+					<Avatar size={"sm"}>{initialize(item.name!)}</Avatar>
+				) : (
+					<Avatar size={"sm"} src={item.image} alt={item.name!} />
+				)}
+
+				<span>{item.name}</span>
+			</Group>
 		</ComboboxOption>
 	));
 
