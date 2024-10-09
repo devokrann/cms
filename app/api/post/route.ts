@@ -1,17 +1,12 @@
 import prisma from "@/services/prisma";
 import { PostGet, PostRelations } from "@/types/model/post";
-import { ClientPageRoot } from "next/dist/client/components/client-page";
 
 export async function POST(req: Request) {
 	try {
 		const post: PostRelations = await req.json();
 
-		console.log(post);
-
 		// query database for post
-		const postRecord = await prisma.post.findUnique({
-			where: { userId_title: { userId: post.userId, title: post.title } },
-		});
+		const postRecord = await prisma.post.findUnique({ where: { title: post.title } });
 
 		if (!postRecord) {
 			// create post
@@ -19,8 +14,12 @@ export async function POST(req: Request) {
 				data: {
 					title: post.title,
 					content: post.content,
+					allowComments: post.allowComments,
+					anonymous: post.anonymous,
+					status: post.status,
+
 					// connect user to post
-					userId: post.userId,
+					userId: !post.userId ? undefined : post.userId,
 					// connect category to post
 					categoryId: post.categoryId ? post.categoryId : undefined,
 					// connect tags to post

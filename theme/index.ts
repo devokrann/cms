@@ -95,17 +95,17 @@ const projectName = createTheme({
 		xl: rem(32),
 	},
 	cursorType: "pointer",
-	components: {
-		PasswordInput: PasswordInput.extend(input.password),
-		Select: Select.extend(input.select),
-		MultiSelect: MultiSelect.extend(input.select),
-		TextInput: TextInput.extend(input.text),
-		Textarea: Textarea.extend(input.textarea),
-		Title: Title.extend(title),
-		Text: Text.extend(text),
-		Container: Container.extend(container),
-		Notification: Notification.extend(notification),
-	},
+	// components: {
+	// 	PasswordInput: PasswordInput.extend(input.password),
+	// 	Select: Select.extend(input.select),
+	// 	MultiSelect: MultiSelect.extend(input.select),
+	// 	TextInput: TextInput.extend(input.text),
+	// 	Textarea: Textarea.extend(input.textarea),
+	// 	Title: Title.extend(title),
+	// 	Text: Text.extend(text),
+	// 	Container: Container.extend(container),
+	// 	Notification: Notification.extend(notification),
+	// },
 });
 
 export default projectName;

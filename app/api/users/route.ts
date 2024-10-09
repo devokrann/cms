@@ -1,5 +1,5 @@
 import prisma from "@/services/prisma";
-import { enumUserStatus } from "@/types/enums";
+import { StatusUser } from "@prisma/client";
 import { UserGet } from "@/types/model/user";
 
 export async function GET(req: Request) {
@@ -22,7 +22,7 @@ export async function PUT(req: Request) {
 	try {
 		const { users, mode } = await req.json();
 
-		if (mode == enumUserStatus.ACTIVE || mode == enumUserStatus.INACTIVE) {
+		if (mode == StatusUser.ACTIVE || mode == StatusUser.INACTIVE) {
 			// update users' status
 			const userStatusUpdate = await Promise.all(
 				users.map(async (u: UserGet) => {
@@ -30,7 +30,7 @@ export async function PUT(req: Request) {
 					const userRecord = await prisma.user.findUnique({ where: { id: u.id } });
 
 					if (userRecord) {
-						if (mode == enumUserStatus.ACTIVE || mode == enumUserStatus.INACTIVE) {
+						if (mode == StatusUser.ACTIVE || mode == StatusUser.INACTIVE) {
 							// update user status
 							const userUpdateStatus = await updateUserStatus(u, mode);
 							return userUpdateStatus;
@@ -49,7 +49,7 @@ export async function PUT(req: Request) {
 	}
 }
 
-const updateUserStatus = async (user: UserGet, mode: enumUserStatus) => {
+const updateUserStatus = async (user: UserGet, mode: StatusUser) => {
 	try {
 		const result = await prisma.user.update({ where: { id: user.id }, data: { status: mode } });
 

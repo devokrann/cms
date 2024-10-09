@@ -1,10 +1,11 @@
 .input {
+	padding: 0 var(--mantine-spacing-md);
+	font-size: var(--mantine-font-size-xs);
+	border-radius: var(--mantine-radius-sm);
+
 	&[data-variant="default"] {
 		border: 0px solid transparent;
-		border-radius: var(--mantine-radius-sm);
 		background-color: light-dark(var(--mantine-color-pri-light), var(--mantine-color-pri-light));
-		padding: 0 var(--mantine-spacing-md);
-		font-size: var(--mantine-font-size-xs);
 
 		@include larger-than($mantine-breakpoint-xs) {
 			font-size: var(--mantine-font-size-sm);
