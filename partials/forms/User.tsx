@@ -25,7 +25,8 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import email from "@/libraries/validators/special/email";
 
 import { capitalizeWord } from "@/handlers/parsers/string";
-import { enumUserRole, enumUserStatus } from "@/types/enums";
+import { StatusUser } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import password from "@/libraries/validators/special/password";
 import compare from "@/libraries/validators/special/compare";
 import { enumRequest } from "@/types/enums";
@@ -56,12 +57,12 @@ export default function User() {
 	const [submitted, setSubmitted] = useState(false);
 
 	const userRoles = [
-		capitalizeWord(enumUserRole.USER),
-		capitalizeWord(enumUserRole.ADMINISTRATOR),
-		capitalizeWord(enumUserRole.DEVELOPER),
+		capitalizeWord(UserRole.USER),
+		capitalizeWord(UserRole.ADMINISTRATOR),
+		capitalizeWord(UserRole.DEVELOPER),
 	];
 
-	const userStatus = [capitalizeWord(enumUserStatus.ACTIVE), capitalizeWord(enumUserStatus.INACTIVE)];
+	const userStatus = [capitalizeWord(StatusUser.ACTIVE), capitalizeWord(StatusUser.INACTIVE)];
 
 	const form = useForm({
 		initialValues: {

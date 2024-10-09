@@ -19,14 +19,20 @@ datasource db {
   // directUrl = env("NEXT_DIRECT_URL") // uses a direct connection
 }
 
-enum Role {
+enum UserRole {
   USER
   ADMINISTRATOR
   DEVELOPER
 }
 
-enum Status {
+enum StatusUser {
   ACTIVE
+  INACTIVE
+}
+
+enum StatusPost {
+  DRAFT
+  PUBLISHED
   INACTIVE
 }
 
@@ -41,8 +47,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   authenticator Authenticator[] // Optional for WebAuthn support
-  role          Role            @default(USER)
-  status        Status          @default(ACTIVE)
+  role          UserRole        @default(USER)
+  status        StatusUser      @default(ACTIVE)
   posts         Post[]
   otps          Otp[]
   otls          Otl[]
@@ -74,20 +80,24 @@ model Profile {
 // app models
 
 model Post {
-  title   String
-  content String
+  title         String
+  content       String
+  status        StatusPost @default(DRAFT)
+  allowComments Boolean    @default(true) @map(name: "allow_comments")
+  anonymous     Boolean    @default(false)
 
   id        String   @id @default(cuid())
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String    @unique @map("user_id")
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?   @unique @map("user_id")
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId String?   @map("category_id")
   tags       Tag[]
 
-  @@unique([userId, title])
+  // @@unique([userId, title])
+  @@unique([title])
   @@map(name: "posts")
 }
 

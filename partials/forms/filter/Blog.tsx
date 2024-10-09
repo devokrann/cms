@@ -5,10 +5,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ActionIcon, Button, Group, Select, Skeleton, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconSearch, IconX } from "@tabler/icons-react";
-import { enumUserStatus } from "@/types/enums";
-import { capitalizeWord, linkify } from "@/handlers/parsers/string";
+import { linkify } from "@/handlers/parsers/string";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { UserRelations } from "@/types/model/user";
 import { PostRelations } from "@/types/model/post";
 
 export default function Blog({ posts, setFilteredPosts }: { posts: any; setFilteredPosts: any }) {
@@ -132,8 +130,8 @@ export default function Blog({ posts, setFilteredPosts }: { posts: any; setFilte
 						<Select
 							data={[
 								{ label: "All", value: "" },
-								{ label: capitalizeWord(enumUserStatus.ACTIVE), value: enumUserStatus.ACTIVE },
-								{ label: capitalizeWord(enumUserStatus.INACTIVE), value: enumUserStatus.INACTIVE },
+								{ label: capitalizeWord(enumStatusUser.ACTIVE), value: enumStatusUser.ACTIVE },
+								{ label: capitalizeWord(enumStatusUser.INACTIVE), value: enumStatusUser.INACTIVE },
 							]}
 							{...form.getInputProps("status")}
 							defaultValue={"all"}

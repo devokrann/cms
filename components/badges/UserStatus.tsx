@@ -1,21 +1,21 @@
-import { enumUserStatus } from "@/types/enums";
+import { StatusUser } from "@prisma/client";
 import { UserGet } from "@/types/model/user";
 import { Badge } from "@mantine/core";
 import React from "react";
 
 export default function UserStatus({ user }: { user: UserGet }) {
 	return (
-		<Badge size="xs" variant="light" color={getStatusColor(user.status as enumUserStatus)}>
+		<Badge size="xs" variant="light" color={getStatusColor(user.status as StatusUser)}>
 			{user.status}
 		</Badge>
 	);
 }
 
-const getStatusColor = (status: enumUserStatus) => {
+const getStatusColor = (status: StatusUser) => {
 	switch (status) {
-		case enumUserStatus.ACTIVE:
+		case StatusUser.ACTIVE:
 			return "green";
-		case enumUserStatus.INACTIVE:
+		case StatusUser.INACTIVE:
 			return "yellow";
 	}
 };

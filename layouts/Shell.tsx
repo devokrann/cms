@@ -20,6 +20,7 @@ import { useDisclosure, useHeadroom } from "@mantine/hooks";
 import HeaderMain from "@/partials/headers/Main";
 import AsideLeft from "@/partials/asides/Left";
 import FooterMain from "@/partials/footers/Main";
+import values from "@/data/values";
 
 export default function Shell({ children }: { children: React.ReactNode }) {
 	const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -30,7 +31,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 	return (
 		<AppShell
 			layout="default"
-			header={{ height: { base: 60 }, collapsed: !pinned }}
+			header={{ height: { base: values.headerHeight }, collapsed: !pinned }}
 			navbar={{
 				width: { sm: 240, md: 280 },
 				breakpoint: "sm",

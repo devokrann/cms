@@ -1,5 +1,6 @@
-import { enumRequest, enumUserStatus } from "@/types/enums";
+import { enumRequest } from "@/types/enums";
 import { UserGet } from "@/types/model/user";
+import { StatusUser } from "@prisma/client";
 
 const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 const headers = {
@@ -22,7 +23,7 @@ export const getUsers = async () => {
 	}
 };
 
-export const updateUsers = async (users: UserGet[], mode: enumUserStatus) => {
+export const updateUsers = async (users: UserGet[], mode: StatusUser) => {
 	try {
 		const response = await fetch(`${apiUrl}/users`, {
 			method: enumRequest.PUT,
@@ -38,7 +39,7 @@ export const updateUsers = async (users: UserGet[], mode: enumUserStatus) => {
 	}
 };
 
-export const updateUser = async (user: UserGet, mode: enumUserStatus) => {
+export const updateUser = async (user: UserGet, mode: StatusUser) => {
 	try {
 		const response = await fetch(`${apiUrl}/user`, {
 			method: enumRequest.PUT,

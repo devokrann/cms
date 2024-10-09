@@ -1,8 +1,7 @@
 import prisma from "@/services/prisma";
-import { enumUserStatus } from "@/types/enums";
 import { UserGet } from "@/types/model/user";
 import hasher from "@/utilities/hasher";
-import { Role, Status } from "@prisma/client";
+import { UserRole, StatusUser } from "@prisma/client";
 
 export async function POST(req: Request) {
 	try {
@@ -41,7 +40,7 @@ export async function PUT(req: Request) {
 		if (!userRecord) {
 			return Response.json({ user: { exists: false } });
 		} else {
-			if (mode == enumUserStatus.ACTIVE || mode == enumUserStatus.INACTIVE) {
+			if (mode == StatusUser.ACTIVE || mode == StatusUser.INACTIVE) {
 				// update user status
 				const userStatusUpdate = await updateUserStatus(user, mode);
 
@@ -75,7 +74,7 @@ export async function DELETE(req: Request) {
 	}
 }
 
-const createUser = async (fields: { role: Role; status: Status; email: string; password: string }) => {
+const createUser = async (fields: { role: UserRole; status: StatusUser; email: string; password: string }) => {
 	try {
 		await prisma.user.create({
 			data: {
@@ -94,7 +93,7 @@ const createUser = async (fields: { role: Role; status: Status; email: string; p
 	}
 };
 
-const updateUserStatus = async (user: UserGet, mode: enumUserStatus) => {
+const updateUserStatus = async (user: UserGet, mode: StatusUser) => {
 	try {
 		const result = await prisma.user.update({ where: { id: user.id }, data: { status: mode } });
 

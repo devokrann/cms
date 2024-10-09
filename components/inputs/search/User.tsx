@@ -132,41 +132,39 @@ export default function User({ hoistChange, label, placeholder, error, required,
 			<ComboboxDropdown>
 				<ComboboxOptions>
 					<ScrollAreaAutosize mah={200} offsetScrollbars scrollbarSize={8}>
-						<ComboboxGroup label="Search by Name">
-							{loading ? (
-								<ComboboxEmpty>
-									<Group justify="center">
-										<Loader type="dots" size={18} />
-									</Group>
-								</ComboboxEmpty>
-							) : optionsName.length > 0 ? (
-								optionsName
-							) : (
-								<Combobox.Empty>
-									<Text component="span" inherit fz={"xs"}>
-										Nothing found...
-									</Text>
-								</Combobox.Empty>
-							)}
-						</ComboboxGroup>
+						{loading ? (
+							<ComboboxEmpty>
+								<Group justify="center">
+									<Loader type="dots" size={18} />
+								</Group>
+							</ComboboxEmpty>
+						) : (
+							<>
+								<ComboboxGroup label="Search by Name">
+									{optionsName.length > 0 ? (
+										optionsName
+									) : (
+										<Combobox.Empty>
+											<Text component="span" inherit fz={"xs"}>
+												Nothing found...
+											</Text>
+										</Combobox.Empty>
+									)}
+								</ComboboxGroup>
 
-						<ComboboxGroup label="Search by Email">
-							{loading ? (
-								<ComboboxEmpty>
-									<Group justify="center">
-										<Loader type="dots" size={18} />
-									</Group>
-								</ComboboxEmpty>
-							) : optionsEmail.length > 0 ? (
-								optionsEmail
-							) : (
-								<Combobox.Empty>
-									<Text component="span" inherit fz={"xs"}>
-										Nothing found...
-									</Text>
-								</Combobox.Empty>
-							)}
-						</ComboboxGroup>
+								<ComboboxGroup label="Search by Email">
+									{optionsEmail.length > 0 ? (
+										optionsEmail
+									) : (
+										<Combobox.Empty>
+											<Text component="span" inherit fz={"xs"}>
+												Nothing found...
+											</Text>
+										</Combobox.Empty>
+									)}
+								</ComboboxGroup>
+							</>
+						)}
 					</ScrollAreaAutosize>
 				</ComboboxOptions>
 			</ComboboxDropdown>

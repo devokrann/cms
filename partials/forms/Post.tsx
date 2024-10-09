@@ -2,14 +2,35 @@
 
 import React, { useEffect, useState } from "react";
 
-import { Box, Button, Fieldset, Grid, GridCol, Group, Stack, TextInput } from "@mantine/core";
+import {
+	Alert,
+	Box,
+	Button,
+	Fieldset,
+	Grid,
+	GridCol,
+	Group,
+	Loader,
+	Stack,
+	Switch,
+	TextInput,
+	Transition,
+} from "@mantine/core";
 
 import { DateInput } from "@mantine/dates";
 
 import { hasLength, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-import { IconCheck, IconX } from "@tabler/icons-react";
+import {
+	IconAlertTriangle,
+	IconArrowUpRight,
+	IconCheck,
+	IconInfoCircle,
+	IconNotes,
+	IconSend,
+	IconX,
+} from "@tabler/icons-react";
 
 import DropzonePost from "@/components/dropezones/Post";
 import { enumRequest } from "@/types/enums";
@@ -18,6 +39,8 @@ import InputTagBlog from "@/components/inputs/tag/Blog";
 import InputContentBlog from "@/components/inputs/content/Blog";
 import InputCategoryBlog from "@/components/inputs/category/Blog";
 import { PostRelations } from "@/types/model/post";
+import values from "@/data/values";
+import { StatusPost } from "@prisma/client";
 
 export default function Post() {
 	// Step 1: Manage the input value state
@@ -41,12 +64,18 @@ export default function Post() {
 	};
 
 	const [submitted, setSubmitted] = useState(false);
+	const [drafted, setDrafted] = useState(false);
+
+	const [info, setInfo] = useState(true);
+	const [warning, setWarning] = useState(true);
+	const [view, setView] = useState(false);
 
 	const form = useForm({
 		initialValues: {
 			title: "",
 			content: "",
-			createdAt: new Date(),
+			comments: true,
+			anonymous: false,
 
 			userId: "",
 			categoryId: "",
@@ -55,7 +84,9 @@ export default function Post() {
 
 		validate: {
 			title: hasLength({ min: 2, max: 120 }, "Between 2 and 120 characters"),
-			userId: hasLength({ min: 2, max: 64 }, "Select an author"),
+			userId: (value, values) =>
+				!values.anonymous && (value.trim().length < 1 || value.trim() == "clear") && "Select an author",
+			content: hasLength({ min: 24, max: 9999 }, "Post content is required"),
 		},
 	});
 
@@ -63,9 +94,10 @@ export default function Post() {
 		return {
 			title: form.values.title.trim(),
 			content: form.values.content,
-			createdAt: form.values.createdAt,
+			allowComments: form.values.comments,
+			anonymous: form.values.anonymous,
 
-			userId: form.values.userId,
+			userId: !form.values.anonymous ? form.values.userId : "",
 			categoryId: form.values.categoryId == "clear" ? "" : form.values.categoryId,
 			tags:
 				form.values.tags.map(t => {
@@ -89,79 +121,96 @@ export default function Post() {
 		form.reset();
 	};
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (draft: boolean = false) => {
 		if (form.isValid()) {
-			if (postContent.trim().length > 16) {
-				try {
+			try {
+				if (!draft) {
 					setSubmitted(true);
+				} else {
+					setDrafted(true);
+				}
 
-					const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
-						method: enumRequest.POST,
-						body: JSON.stringify(parse()),
-						headers: {
-							"Content-Type": "application/json",
-							Accept: "application/json",
-						},
-					});
+				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
+					method: enumRequest.POST,
+					body: JSON.stringify({ ...parse(), status: draft ? StatusPost.DRAFT : StatusPost.PUBLISHED }),
+					headers: {
+						"Content-Type": "application/json",
+						Accept: "application/json",
+					},
+				});
 
-					const res = await response.json();
+				const res = await response.json();
 
-					if (!res) {
-						notifications.show({
-							id: "blog-post-create-failed-no-response",
-							icon: <IconX size={16} stroke={1.5} />,
-							autoClose: 5000,
-							title: "Server Unavailable",
-							message: `There was no response from the server.`,
-							variant: "failed",
-						});
-					} else {
-						if (!res.post.exists) {
-							notifications.show({
-								id: "blog-post-create-success",
-								icon: <IconCheck size={16} stroke={1.5} />,
-								autoClose: 5000,
-								title: "Post Created",
-								message: `The post has been added`,
-								variant: "success",
-							});
-						} else {
-							notifications.show({
-								id: "blog-post-create-failed-exists",
-								icon: <IconX size={16} stroke={1.5} />,
-								autoClose: 5000,
-								title: "Post Exists",
-								message: `That Title-Author combination already exists.`,
-								variant: "failed",
-							});
-						}
-					}
-				} catch (error) {
+				if (!res) {
 					notifications.show({
-						id: "blog-post-create-failed",
+						id: "blog-post-create-failed-no-response",
 						icon: <IconX size={16} stroke={1.5} />,
-						autoClose: 5000,
-						title: "Submisstion Failed",
-						message: (error as Error).message,
+						title: "Server Unavailable",
+						message: `There was no response from the server.`,
 						variant: "failed",
 					});
-				} finally {
-					// reset from
-					handleReset();
-					setSubmitted(false);
+				} else {
+					if (!res.post.exists) {
+						notifications.show({
+							id: "blog-post-create-success",
+							icon: <IconCheck size={16} stroke={1.5} />,
+							title: `${draft ? "Draft Saved" : "Post Published"}`,
+							message: `The post has been ${draft ? "saved as a draft" : "published"}`,
+							variant: "success",
+						});
+
+						// reset from
+						handleReset();
+
+						// show view button
+						setView(true);
+						setTimeout(() => {
+							setView(false);
+						}, 5000);
+					} else {
+						notifications.show({
+							id: "blog-post-create-failed-exists",
+							icon: <IconX size={16} stroke={1.5} />,
+							title: "Post Exists",
+							message: `${
+								parse().userId
+									? "That Title-Author combination already exists."
+									: "A post with that title already exists."
+							}`,
+							variant: "failed",
+						});
+					}
 				}
-			} else {
+			} catch (error) {
 				notifications.show({
-					id: "blog-post-create-failed-content",
+					id: "blog-post-create-failed",
 					icon: <IconX size={16} stroke={1.5} />,
-					autoClose: 5000,
-					title: "Content Required",
-					message: "Add blog post content",
+					title: "Submisstion Failed",
+					message: (error as Error).message,
 					variant: "failed",
 				});
+			} finally {
+				setSubmitted(false);
+				setDrafted(false);
 			}
 		}
 	};
+
+	// const handleSubmitDebounce = useDebouncedCallback(async () => {
+	// 	if (form.isValid()) {
+	// 		setTimeout(async () => {
+	// 			await handleSubmit(true);
+	// 		}, 1000);
+	// 	} else {
+	// 		form.validate();
+	// 	}
+	// }, 1000);
+
+	// useEffect(() => {
+	// 	if (form.isDirty()) {
+	// 		handleSubmitDebounce();
+	// 	}
+	// }, [form.values]);
 
 	useEffect(() => {
 		if (userId !== form.values.userId) {
@@ -194,22 +243,162 @@ export default function Post() {
 	return (
 		<Box component="form" onSubmit={form.onSubmit(values => handleSubmit())} noValidate>
 			<Grid>
+				<GridCol span={12}>
+					<Group justify="end">
+						<Button
+							type="submit"
+							loading={submitted}
+							disabled={drafted}
+							leftSection={<IconSend size={16} stroke={1.5} />}
+						>
+							{submitted ? "Publishing" : "Publish"}
+						</Button>
+					</Group>
+				</GridCol>
+
+				<Transition mounted={warning} transition="fade" duration={250} timingFunction="ease">
+					{styles => (
+						<div style={{ ...styles, width: "100%" }}>
+							<GridCol span={12}>
+								<Alert
+									variant="light"
+									color="yellow"
+									title="Save as Draft"
+									icon={<IconAlertTriangle size={16} stroke={1.5} />}
+									withCloseButton
+									onClose={() => setWarning(false)}
+									styles={{
+										message: {
+											paddingRight: "var(--mantine-spacing-xl)",
+										},
+									}}
+								>
+									To avoid losing your changes, first save the post as a draft then continue working
+									on the content in the edit posts section.
+								</Alert>
+							</GridCol>
+						</div>
+					)}
+				</Transition>
+
 				<GridCol span={{ base: 12, md: 8 }}>
-					<Grid>
+					<Grid gutter={0}>
 						<GridCol span={12}>
-							<Fieldset legend="Post Details">
-								<Grid>
+							<TextInput
+								required
+								placeholder={"Title"}
+								{...form.getInputProps("title")}
+								styles={{
+									input: {
+										borderColor: "transparent",
+										backgroundColor: "transparent",
+										fontSize: "var(--mantine-font-size-lg)",
+									},
+								}}
+							/>
+						</GridCol>
+
+						<GridCol span={12}>
+							<InputContentBlog
+								hoistChange={handleContentChange}
+								initialValue={postContent}
+								error={form.errors.content}
+							/>
+						</GridCol>
+
+						<Transition
+							mounted={form.values.content.trim().length > 7 && info}
+							transition="fade"
+							duration={250}
+							timingFunction="ease"
+						>
+							{styles => (
+								<div style={{ ...styles, width: "100%" }}>
 									<GridCol span={12}>
-										<TextInput
-											required
-											label={"Title"}
-											placeholder={"Post Title"}
-											{...form.getInputProps("title")}
-										/>
+										<Alert
+											variant="light"
+											color="blue"
+											title="Quick Formatting"
+											icon={<IconInfoCircle size={16} stroke={1.5} />}
+											withCloseButton
+											onClose={() => setInfo(false)}
+											styles={{
+												message: {
+													paddingRight: "var(--mantine-spacing-xl)",
+												},
+											}}
+											mt={"xl"}
+										>
+											To access quick formatting options, highlight the text you&apos;d like to
+											style and a toolbar will appear.
+										</Alert>
 									</GridCol>
-									<GridCol span={{ base: 12, md: 6 }}>
+								</div>
+							)}
+						</Transition>
+					</Grid>
+				</GridCol>
+
+				<GridCol span={{ base: 12, md: 4 }}>
+					<Stack pos={"sticky"} top={`calc(${values.headerHeight}px + var(--mantine-spacing-lg))`}>
+						<Group grow>
+							<Button
+								variant="light"
+								type="reset"
+								onClick={handleReset}
+								disabled={drafted || submitted}
+								leftSection={<IconX size={16} stroke={1.5} />}
+							>
+								Cancel
+							</Button>
+
+							{!view ? (
+								<Button
+									type={"submit"}
+									variant="outline"
+									disabled={drafted || submitted}
+									leftSection={drafted ? <Loader size={16} /> : <IconNotes size={16} stroke={1.5} />}
+									onClick={() => handleSubmit(true)}
+								>
+									{drafted ? "Saving Draft" : "Save Draft"}
+								</Button>
+							) : (
+								<Button
+									variant="outline"
+									color="green"
+									leftSection={<IconArrowUpRight size={16} stroke={1.5} />}
+									// onClick={() => handleSubmit(true)}
+								>
+									View Draft
+								</Button>
+							)}
+						</Group>
+
+						<Fieldset legend="Properties">
+							<Grid>
+								<GridCol span={12}>
+									<Switch
+										size="xs"
+										label="Allow commenting"
+										description="Readers will leave comments"
+										key={form.key("comments")}
+										{...form.getInputProps("comments")}
+										checked={form.values.comments}
+									/>
+								</GridCol>
+								<GridCol span={12}>
+									<Switch
+										size="xs"
+										label="Post as anonymous"
+										description="Author won't be required"
+										key={form.key("anonymous")}
+										{...form.getInputProps("anonymous")}
+										checked={form.values.anonymous}
+									/>
+								</GridCol>
+								{!form.values.anonymous && (
+									<GridCol span={12}>
 										<InputSearchUser
-											label={"Author"}
 											placeholder={"Post Author"}
 											hoistChange={handleUserChange}
 											{...form.getInputProps("userId")}
@@ -218,31 +407,15 @@ export default function Post() {
 											autoComplete="off"
 										/>
 									</GridCol>
-									<GridCol span={{ base: 12, md: 6 }}>
-										<DateInput
-											required
-											label={"Publication Date"}
-											placeholder={"Post Publication Date"}
-											{...form.getInputProps("createdAt")}
-										/>
-									</GridCol>
-								</Grid>
-							</Fieldset>
-						</GridCol>
+								)}
+							</Grid>
+						</Fieldset>
 
-						<GridCol span={12}>
-							<InputContentBlog hoistChange={handleContentChange} initialValue={postContent} />
-						</GridCol>
-					</Grid>
-				</GridCol>
-
-				<GridCol span={{ base: 12, md: 4 }}>
-					<Stack pos={"sticky"} top={"var(--mantine-spacing-lg)"}>
-						<Fieldset legend="Post Image">
+						<Fieldset legend="Media">
 							<DropzonePost />
 						</Fieldset>
 
-						<Fieldset legend="Metadata">
+						<Fieldset legend="Grouping">
 							<Grid>
 								<GridCol span={12}>
 									<InputCategoryBlog
@@ -269,18 +442,6 @@ export default function Post() {
 							</Grid>
 						</Fieldset>
 					</Stack>
-				</GridCol>
-
-				<GridCol span={12}>
-					<Group mt={"md"}>
-						<Button variant="light" type="reset" onClick={handleReset} disabled={submitted}>
-							Cancel
-						</Button>
-
-						<Button type="submit" loading={submitted}>
-							{submitted ? "Sending" : "Send"}
-						</Button>
-					</Group>
 				</GridCol>
 			</Grid>
 		</Box>

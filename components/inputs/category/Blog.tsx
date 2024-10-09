@@ -66,6 +66,8 @@ export default function Blog({ hoistChange, label, placeholder, description, req
 
 			if (!result.category.exists) {
 				setData(prevData => [...prevData, result.category.category]);
+				setValue(capitalizeWords(search.trim()));
+				setSearch(capitalizeWords(search.trim()));
 			}
 		} catch (e) {
 			console.error("X-> Failed to update categories:", e);

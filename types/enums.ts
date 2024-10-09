@@ -16,17 +16,6 @@ export enum enumRequest {
 	DELETE = "DELETE",
 }
 
-export enum enumUserRole {
-	USER = "USER",
-	ADMINISTRATOR = "ADMINISTRATOR",
-	DEVELOPER = "DEVELOPER",
-}
-
-export enum enumUserStatus {
-	ACTIVE = "ACTIVE",
-	INACTIVE = "INACTIVE",
-}
-
 export enum enumTableUsers {
 	NAME = "NAME",
 	EMAIL = "EMAIL",

@@ -6,7 +6,7 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { UserGet } from "@/types/model/user";
 import { updateUser, updateUsers } from "@/handlers/database/users";
-import { enumUserStatus } from "@/types/enums";
+import { StatusUser } from "@prisma/client";
 
 export default function Activate({
 	children,
@@ -31,7 +31,7 @@ export default function Activate({
 			setLoading(true);
 
 			if (selection) {
-				const res = await updateUser(selection, enumUserStatus.ACTIVE);
+				const res = await updateUser(selection, StatusUser.ACTIVE);
 
 				if (!res) {
 					notifications.show({
@@ -57,7 +57,7 @@ export default function Activate({
 						setUsers(
 							users?.map(u => {
 								if (u.id == selection.id) {
-									return { ...u, status: enumUserStatus.ACTIVE };
+									return { ...u, status: StatusUser.ACTIVE };
 								} else {
 									return u;
 								}
@@ -77,7 +77,7 @@ export default function Activate({
 			}
 
 			if (selections) {
-				const res = await updateUsers(selections, enumUserStatus.ACTIVE);
+				const res = await updateUsers(selections, StatusUser.ACTIVE);
 
 				if (!res) {
 					notifications.show({
@@ -90,7 +90,7 @@ export default function Activate({
 					});
 				} else {
 					// filter out active users
-					const filtrate = selections.filter(s => s.status != enumUserStatus.ACTIVE);
+					const filtrate = selections.filter(s => s.status != StatusUser.ACTIVE);
 
 					// update parent state
 					setUsers(
@@ -98,7 +98,7 @@ export default function Activate({
 							const currentItem = filtrate.find(s => s.id == u.id);
 
 							if (u.id == currentItem?.id) {
-								return { ...u, status: enumUserStatus.ACTIVE };
+								return { ...u, status: StatusUser.ACTIVE };
 							} else {
 								return u;
 							}

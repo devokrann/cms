@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ActionIcon, Button, Group, Select, Skeleton, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconSearch, IconX } from "@tabler/icons-react";
-import { enumUserStatus } from "@/types/enums";
+import { StatusUser } from "@prisma/client";
 import { capitalizeWord, linkify } from "@/handlers/parsers/string";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UserRelations } from "@/types/model/user";
@@ -128,8 +128,8 @@ export default function Users({ users, setFilteredUsers }: { users: any; setFilt
 						<Select
 							data={[
 								{ label: "All", value: "" },
-								{ label: capitalizeWord(enumUserStatus.ACTIVE), value: enumUserStatus.ACTIVE },
-								{ label: capitalizeWord(enumUserStatus.INACTIVE), value: enumUserStatus.INACTIVE },
+								{ label: capitalizeWord(StatusUser.ACTIVE), value: StatusUser.ACTIVE },
+								{ label: capitalizeWord(StatusUser.INACTIVE), value: StatusUser.INACTIVE },
 							]}
 							{...form.getInputProps("status")}
 							defaultValue={"all"}
