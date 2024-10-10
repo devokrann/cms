@@ -111,6 +111,7 @@ export const useSortUsers = (setList: any) => {
 export const useSortBlog = (setList: any) => {
 	const [titleOrder, setTitleOrder] = useState<enumSort>(enumSort.DEFAULT);
 	const [categoryOrder, setCategoryOrder] = useState<enumSort>(enumSort.DEFAULT);
+	const [statusOrder, setStatusOrder] = useState<enumSort>(enumSort.DEFAULT);
 	const [authorOrder, setAuthorOrder] = useState<enumSort>(enumSort.DEFAULT);
 	const [createdOrder, setCreatedOrder] = useState<enumSort>(enumSort.DEFAULT);
 
@@ -152,18 +153,52 @@ export const useSortBlog = (setList: any) => {
 				});
 				break;
 
+			case enumTablePosts.STATUS:
+				setCategoryOrder(prevStatusOrder => {
+					if (prevStatusOrder == enumSort.DEFAULT || prevStatusOrder == enumSort.DESCENDING) {
+						// Create a shallow copy of items and sort by 'category' ascending
+						setList((list: any) => [...list].sort((a, b) => a.status.localeCompare(b.status)));
+
+						return enumSort.ASCENDING;
+					} else {
+						// Create a shallow copy of items and sort by 'category' descending
+						setList((list: any) => [...list].sort((a, b) => a.status.localeCompare(b.status)).reverse());
+
+						return enumSort.DESCENDING;
+					}
+				});
+				break;
+
 			case enumTablePosts.AUTHOR:
 				setAuthorOrder(prevAuthorOrder => {
 					if (prevAuthorOrder == enumSort.DEFAULT || prevAuthorOrder == enumSort.DESCENDING) {
 						// Create a shallow copy of items and sort by 'author' ascending
-						setList((list: any) => [...list!].sort((a, b) => a.user.name?.localeCompare(b.user.name!)!));
+						setList((list: any) => {
+							// Split the array into two: one with valid names and one with null names
+							const validNames = [...list!].filter(item => item.user);
+							const nullNames = [...list!].filter(item => !item.user);
+
+							// Sort the array with valid names
+							validNames.sort((a, b) => a.user.name!.localeCompare(b.user.name!));
+
+							// Concatenate the sorted valid names array with the null names array
+							return [...validNames, ...nullNames];
+						});
 
 						return enumSort.ASCENDING;
 					} else {
 						// Create a shallow copy of items and sort by 'author' descending
-						setList((list: any) =>
-							[...list!].sort((a, b) => a.user.name?.localeCompare(b.user.name!)!).reverse()
-						);
+						setList((list: any) => {
+							// Split the array into two: one with valid names and one with null names
+							const validNames = [...list!].filter(item => item.user);
+							const nullNames = [...list!].filter(item => !item.user);
+
+							// Sort the array with valid names
+							validNames.sort((a, b) => a.user.name!.localeCompare(b.user.name!)).reverse();
+
+							// Concatenate the sorted valid names array with the null names array
+							return [...validNames, ...nullNames];
+						});
 
 						return enumSort.DESCENDING;
 					}
@@ -200,5 +235,5 @@ export const useSortBlog = (setList: any) => {
 		}
 	};
 
-	return { sort: sortItems, titleOrder, categoryOrder, authorOrder, createdOrder };
+	return { sort: sortItems, titleOrder, categoryOrder, statusOrder, authorOrder, createdOrder };
 };

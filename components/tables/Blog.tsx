@@ -4,6 +4,8 @@ import React from "react";
 
 import {
 	ActionIcon,
+	Anchor,
+	Avatar,
 	Badge,
 	Center,
 	Checkbox,
@@ -30,6 +32,9 @@ import ActionIconSort from "../action-icon/Sort";
 import ModalsPostDelete from "../modals/post/Delete";
 import { useSortBlog } from "@/hooks/sort";
 import { enumTablePosts } from "@/types/enums";
+import { initialize } from "@/handlers/parsers/string";
+import Link from "next/link";
+import BadgeStatusPost from "../badges/status/Post";
 
 export default function Blog({
 	posts,
@@ -46,7 +51,7 @@ export default function Blog({
 	selectedRows: string[];
 	setSelectedRows: any;
 }) {
-	const { sort, titleOrder, categoryOrder, authorOrder, createdOrder } = useSortBlog(setPosts);
+	const { sort, titleOrder, categoryOrder, statusOrder, authorOrder, createdOrder } = useSortBlog(setPosts);
 
 	const rows = items?.map(post => {
 		return (
@@ -81,16 +86,40 @@ export default function Blog({
 					</Text>
 				</TableTd>
 
-				<TableTd w={tableWidths.category}>
-					<Badge color={"gray"} variant="light" size="xs">
-						{post.category?.title}
-					</Badge>
+				<TableTd w={tableWidths.author}>
+					<Group gap={"xs"} wrap="nowrap">
+						{!post.user ? (
+							<Anchor inherit>
+								<Avatar>A</Avatar>
+							</Anchor>
+						) : !post.user.image ? (
+							<Anchor inherit component={Link} href={`/listings/users/${post.user.id}`} underline="never">
+								<Avatar>{initialize(post.user.name!)}</Avatar>
+							</Anchor>
+						) : (
+							<Anchor inherit component={Link} href={`/listings/users/${post.user.id}`} underline="never">
+								<Avatar src={post.user.image} alt={post.user.name!} />
+							</Anchor>
+						)}
+
+						{!post.user ? (
+							<Tooltip label={"Anonymous"} withArrow position="top-start" fz={"xs"}>
+								<Text component="span" inherit lineClamp={1}>
+									Anonymous
+								</Text>
+							</Tooltip>
+						) : (
+							<Tooltip label={post.user.name} withArrow position="top-start" fz={"xs"}>
+								<Text component="span" inherit lineClamp={1}>
+									{post.user.name}
+								</Text>
+							</Tooltip>
+						)}
+					</Group>
 				</TableTd>
 
-				<TableTd w={tableWidths.author}>
-					<Text component="span" inherit lineClamp={1}>
-						{post.user.name}
-					</Text>
+				<TableTd w={tableWidths.status}>
+					<BadgeStatusPost post={post} />
 				</TableTd>
 
 				<TableTd w={tableWidths.created}>{parseDateYmd(post.createdAt!)}</TableTd>
@@ -128,9 +157,10 @@ export default function Blog({
 									<Checkbox
 										size="xs"
 										aria-label="Select row"
-										checked={posts?.length != 0 && selectedRows.length == posts?.length}
+										checked={items.length > 0 && selectedRows.length == items.length}
+										indeterminate={selectedRows.length > 0 && selectedRows.length != items.length}
 										onChange={event =>
-											setSelectedRows(event.currentTarget.checked ? posts?.map(p => p.id)! : [])
+											setSelectedRows(event.currentTarget.checked ? items?.map(p => p.id)! : [])
 										}
 									/>
 								)}
@@ -139,7 +169,7 @@ export default function Blog({
 
 						<TableTh>
 							<Group gap={"xs"}>
-								<Text component="span" inherit>
+								<Text component="span" inherit fw={500}>
 									Title
 								</Text>
 
@@ -156,24 +186,7 @@ export default function Blog({
 
 						<TableTh>
 							<Group gap={"xs"}>
-								<Text component="span" inherit>
-									Category
-								</Text>
-
-								{!posts ? (
-									<Skeleton h={16} w={16} />
-								) : (
-									<ActionIconSort
-										order={categoryOrder}
-										sortFunction={() => sort(enumTablePosts.CATEGORY)}
-									/>
-								)}
-							</Group>
-						</TableTh>
-
-						<TableTh>
-							<Group gap={"xs"}>
-								<Text component="span" inherit>
+								<Text component="span" inherit fw={500}>
 									Author
 								</Text>
 
@@ -190,7 +203,24 @@ export default function Blog({
 
 						<TableTh>
 							<Group gap={"xs"}>
-								<Text component="span" inherit>
+								<Text component="span" inherit fw={500}>
+									Status
+								</Text>
+
+								{!posts ? (
+									<Skeleton h={16} w={16} />
+								) : (
+									<ActionIconSort
+										order={statusOrder}
+										sortFunction={() => sort(enumTablePosts.STATUS)}
+									/>
+								)}
+							</Group>
+						</TableTh>
+
+						<TableTh>
+							<Group gap={"xs"}>
+								<Text component="span" inherit fw={500}>
 									Created On
 								</Text>
 
@@ -210,13 +240,18 @@ export default function Blog({
 				</TableThead>
 
 				<TableTbody>
-					{!posts
-						? Array(15)
-								.fill(0)
-								.map((_, index) => skeletonRow)
-						: posts.length > 0
-						? rows
-						: emptyRow}
+					{!posts ? (
+						Array(15)
+							.fill(0)
+							.map((_, index) => skeletonRow)
+					) : items.length > 0 ? (
+						<>
+							{/* {skeletonRow} */}
+							{rows}
+						</>
+					) : (
+						emptyRow
+					)}
 				</TableTbody>
 			</Table>
 		</Stack>
@@ -226,32 +261,35 @@ export default function Blog({
 const tableWidths = {
 	check: { md: "5%", lg: "5%" },
 	title: { md: "30%", lg: "30%" },
-	category: { md: "20%", lg: "20%" },
-	author: { md: "20%", lg: "20%" },
+	status: { md: "15%", lg: "15%" },
+	author: { md: "25%", lg: "25%" },
 	created: { md: "20%", lg: "20%" },
 	delete: { md: "5%", lg: "5%" },
 };
 
 const skeletonRow = (
 	<TableTr>
-		<TableTd>
+		<TableTd w={tableWidths.check}>
 			<Center>
 				<Skeleton h={16} w={16} my={4} />
 			</Center>
 		</TableTd>
-		<TableTd>
+		<TableTd w={tableWidths.title}>
 			<Skeleton h={12} w={"80%"} my={4} />
 		</TableTd>
-		<TableTd>
-			<Skeleton h={12} w={"50%"} my={4} />
+		<TableTd w={tableWidths.author}>
+			<Group gap={"xs"}>
+				<Skeleton h={38} w={38} radius={"xl"} />
+				<Skeleton h={12} w={"50%"} />
+			</Group>
 		</TableTd>
-		<TableTd>
+		<TableTd w={tableWidths.status}>
 			<Skeleton h={12} w={"80%"} my={4} />
 		</TableTd>
-		<TableTd>
+		<TableTd w={tableWidths.created}>
 			<Skeleton h={12} w={{ lg: "50%" }} my={4} />
 		</TableTd>
-		<TableTd>
+		<TableTd w={tableWidths.delete}>
 			<Center>
 				<Skeleton h={24} w={24} my={4} />
 			</Center>
