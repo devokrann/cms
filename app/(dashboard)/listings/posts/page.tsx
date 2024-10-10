@@ -34,7 +34,7 @@ export default function Posts() {
 	// paginate logic
 	const divisors = [5, 10, 15, 20, 25];
 	const [divisor, setDivisor] = useState<string | null>(divisors[0].toString());
-	const { activePage, setActivePage, items, setItems } = usePaginate(filteredPosts!, divisor!);
+	const { activePage, setActivePage, items, setItems, pageRange } = usePaginate(filteredPosts!, divisor!);
 
 	// table logic
 	const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -66,7 +66,11 @@ export default function Posts() {
 				<Stack>
 					<Card withBorder shadow="xs" padding={"xs"}>
 						<Stack>
-							<FormFilterBlog posts={posts} setFilteredPosts={setFilteredPosts} />
+							<FormFilterBlog
+								posts={posts}
+								setFilteredPosts={setFilteredPosts}
+								setSelectedRows={setSelectedRows}
+							/>
 
 							<Divider />
 
@@ -135,7 +139,12 @@ export default function Posts() {
 								<Skeleton h={16} w={160} />
 							) : (
 								<Text component="span" inherit fz={"xs"}>
-									Showing <NumberFormatter thousandSeparator value={items.length} /> of{" "}
+									Showing{" "}
+									{filteredPosts?.length! > 0 && (
+										<>
+											{pageRange?.from} to {pageRange?.to} of
+										</>
+									)}{" "}
 									<NumberFormatter thousandSeparator value={filteredPosts?.length} /> posts
 								</Text>
 							)}

@@ -33,9 +33,9 @@ export default function Users() {
 	}, []);
 
 	// paginate logic
-	const divisors = [5, 10, 15, 20, 25];
+	const divisors = [10, 15, 20, 25];
 	const [divisor, setDivisor] = useState<string | null>(divisors[0].toString());
-	const { activePage, setActivePage, items, setItems } = usePaginate(filteredUsers!, divisor!);
+	const { activePage, setActivePage, items, setItems, pageRange } = usePaginate(filteredUsers!, divisor!);
 
 	// table logic
 	const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -67,7 +67,11 @@ export default function Users() {
 				<Stack>
 					<Card withBorder shadow="xs" padding={"xs"}>
 						<Stack>
-							<FormFilterUsers users={users} setFilteredUsers={setFilteredUsers} />
+							<FormFilterUsers
+								users={users}
+								setFilteredUsers={setFilteredUsers}
+								setSelectedRows={setSelectedRows}
+							/>
 
 							<Divider />
 
@@ -157,7 +161,12 @@ export default function Users() {
 								<Skeleton h={16} w={160} />
 							) : (
 								<Text component="span" inherit fz={"xs"}>
-									Showing <NumberFormatter thousandSeparator value={items.length} /> of{" "}
+									Showing{" "}
+									{filteredUsers?.length! > 0 && (
+										<>
+											{pageRange?.from} to {pageRange?.to} of
+										</>
+									)}{" "}
 									<NumberFormatter thousandSeparator value={filteredUsers?.length} /> users
 								</Text>
 							)}
