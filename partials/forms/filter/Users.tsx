@@ -10,7 +10,15 @@ import { capitalizeWord, linkify } from "@/handlers/parsers/string";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UserRelations } from "@/types/model/user";
 
-export default function Users({ users, setFilteredUsers }: { users: any; setFilteredUsers: any }) {
+export default function Users({
+	users,
+	setFilteredUsers,
+	setSelectedRows,
+}: {
+	users: any;
+	setFilteredUsers: any;
+	setSelectedRows: any;
+}) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -37,6 +45,7 @@ export default function Users({ users, setFilteredUsers }: { users: any; setFilt
 	const handleReset = async () => {
 		const clearForm = async () => {
 			form.setValues({ search: "", status: "" });
+			setSelectedRows([]);
 		};
 
 		const clearParams = async () => {
@@ -127,7 +136,7 @@ export default function Users({ users, setFilteredUsers }: { users: any; setFilt
 					) : (
 						<Select
 							data={[
-								{ label: "All", value: "" },
+								{ label: "All (Status)", value: "" },
 								{ label: capitalizeWord(StatusUser.ACTIVE), value: StatusUser.ACTIVE },
 								{ label: capitalizeWord(StatusUser.INACTIVE), value: StatusUser.INACTIVE },
 							]}

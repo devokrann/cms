@@ -31,7 +31,7 @@ import { UserRelations } from "@/types/model/user";
 import ModalUserActivate from "../modals/user/Activate";
 import ModalUserDeactivate from "../modals/user/Deactivate";
 import { useSortUsers } from "@/hooks/sort";
-import BadgeUserStatus from "../badges/UserStatus";
+import BadgeStatusUser from "../badges/status/User";
 import ActionIconSort from "../action-icon/Sort";
 import { initialize } from "@/handlers/parsers/string";
 
@@ -113,7 +113,7 @@ export default function Users({
 			</TableTd>
 
 			<TableTd w={tableWidths.status}>
-				<BadgeUserStatus user={user} />
+				<BadgeStatusUser user={user} />
 			</TableTd>
 
 			<TableTd w={tableWidths.created}>{parseDateYmd(user.createdAt!)}</TableTd>
@@ -187,9 +187,10 @@ export default function Users({
 								<Checkbox
 									size="xs"
 									aria-label="Select rows"
-									checked={items.length != 0 && selectedRows.length == items.length}
+									checked={items.length > 0 && selectedRows.length == items.length}
+									indeterminate={selectedRows.length > 0 && selectedRows.length != items.length}
 									onChange={event =>
-										setSelectedRows(event.currentTarget.checked ? items.map(u => u.id)! : [])
+										setSelectedRows(event.currentTarget.checked ? items.map(u => u.id) : [])
 									}
 								/>
 							)}
@@ -260,13 +261,18 @@ export default function Users({
 			</TableThead>
 
 			<TableTbody>
-				{!users
-					? Array(15)
-							.fill(0)
-							.map((_, index) => skeletonRow)
-					: items.length > 0
-					? rows
-					: emptyRow}
+				{!users ? (
+					Array(15)
+						.fill(0)
+						.map((_, index) => skeletonRow)
+				) : items.length > 0 ? (
+					<>
+						{/* {skeletonRow} */}
+						{rows}
+					</>
+				) : (
+					emptyRow
+				)}
 			</TableTbody>
 		</Table>
 	);
@@ -289,7 +295,10 @@ const skeletonRow = (
 			</Center>
 		</TableTd>
 		<TableTd w={tableWidths.name}>
-			<Skeleton h={12} w={"80%"} my={4} />
+			<Group gap={"xs"}>
+				<Skeleton h={38} w={38} radius={"xl"} />
+				<Skeleton h={12} w={"50%"} />
+			</Group>
 		</TableTd>
 		<TableTd w={tableWidths.email}>
 			<Skeleton h={12} w={"80%"} my={4} />
