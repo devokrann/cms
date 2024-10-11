@@ -1,24 +1,25 @@
 import prisma from "@/services/prisma";
-import { UserGet } from "@/types/model/user";
+import { ProfileCreate } from "@/types/model/profile";
+import { UserGet, UserRelations } from "@/types/model/user";
 import hasher from "@/utilities/hasher";
-import { UserRole, StatusUser } from "@prisma/client";
+import { StatusUser } from "@prisma/client";
 
 export async function POST(req: Request) {
 	try {
-		const { account, profile } = await req.json();
+		const user: UserRelations = await req.json();
 
 		// query database for user
-		const userRecord = await prisma.user.findUnique({ where: { email: account.email } });
+		const userRecord = await prisma.user.findUnique({ where: { email: user.email } });
 
 		if (!userRecord) {
 			// create password hash
-			const passwordHash = await hasher.hash(account.password);
+			const passwordHash = await hasher.hash(user.password!);
 
 			// create user
-			passwordHash && (await createUser({ ...account, password: passwordHash }));
+			await createUser({ ...user, password: passwordHash ? passwordHash : null });
 
 			// create user profile if profile is provided
-			profile.name.first && passwordHash && (await createProfile({ email: account.email, ...profile }));
+			user.profile && passwordHash && (await createProfile({ email: user.email, ...user.profile }));
 
 			return Response.json({ user: { exists: false } });
 		} else {
@@ -30,16 +31,16 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: Request, { params }: { params: { userId: string } }) {
 	try {
-		const { user, mode } = await req.json();
-
 		// query database for user
-		const userRecord = await prisma.user.findUnique({ where: { id: user.id } });
+		const userRecord = await prisma.user.findUnique({ where: { id: params.userId } });
 
 		if (!userRecord) {
 			return Response.json({ user: { exists: false } });
 		} else {
+			const { user, mode } = await req.json();
+
 			if (mode == StatusUser.ACTIVE || mode == StatusUser.INACTIVE) {
 				// update user status
 				const userStatusUpdate = await updateUserStatus(user, mode);
@@ -55,16 +56,14 @@ export async function PUT(req: Request) {
 	}
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: { userId: string } }) {
 	try {
-		const { id } = await req.json();
-
-		const userRecord = await prisma.user.findUnique({ where: { id } });
+		const userRecord = await prisma.user.findUnique({ where: { id: params.userId } });
 
 		if (!userRecord) {
 			return Response.json({ user: { exists: false } });
 		} else {
-			await deleteUser(id);
+			await deleteUser(params.userId);
 
 			return Response.json({ user: { exists: true } });
 		}
@@ -74,12 +73,13 @@ export async function DELETE(req: Request) {
 	}
 }
 
-const createUser = async (fields: { role: UserRole; status: StatusUser; email: string; password: string }) => {
+const createUser = async (fields: UserRelations) => {
 	try {
 		await prisma.user.create({
 			data: {
 				role: fields.role,
 				status: fields.status,
+				name: fields.name,
 
 				email: fields.email,
 				password: fields.password,
@@ -104,29 +104,16 @@ const updateUserStatus = async (user: UserGet, mode: StatusUser) => {
 	}
 };
 
-const createProfile = async (fields: {
-	email: string;
-	name: { first: string; last: string };
-	bio: string;
-	phone: string;
-	address: string;
-	city: string;
-	state: string;
-	country: string;
-}) => {
+const createProfile = async (fields: Omit<ProfileCreate, "user"> & { email: string }) => {
 	try {
-		const joinedName = `${fields.name.first} ${fields.name.last}`;
-
 		await prisma.user.update({
 			where: { email: fields.email },
 
 			data: {
-				name: joinedName.trim().length > 0 ? joinedName : null,
-
 				profile: {
 					create: {
-						firstName: fields.name.first,
-						lastName: fields.name.last,
+						firstName: fields.firstName,
+						lastName: fields.lastName,
 						bio: fields.bio,
 						phone: fields.phone,
 						address: fields.address,
