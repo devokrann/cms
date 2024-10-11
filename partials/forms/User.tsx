@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import {
 	Box,
 	Button,
+	Checkbox,
 	Fieldset,
 	Grid,
 	GridCol,
@@ -24,58 +25,46 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 
 import email from "@/libraries/validators/special/email";
 
-import { capitalizeWord } from "@/handlers/parsers/string";
+import { capitalizeWord, capitalizeWords } from "@/handlers/parsers/string";
 import { StatusUser } from "@prisma/client";
 import { UserRole } from "@prisma/client";
 import password from "@/libraries/validators/special/password";
 import compare from "@/libraries/validators/special/compare";
-import { enumRequest } from "@/types/enums";
 import DropzoneUser from "@/components/dropezones/User";
 import text from "@/libraries/validators/special/text";
-
-interface typeFormUser {
-	account: {
-		role: string;
-		status: string;
-		email: string;
-		password: string;
-		passwordConfirm: string;
-	};
-
-	profile: {
-		name: { first: string; last: string };
-		bio: string;
-		phone: string;
-		address?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-	};
-}
+import values from "@/data/values";
+import { FormUserCreate } from "@/types/form";
+import { addUser } from "@/handlers/database/users";
 
 export default function User() {
 	const [submitted, setSubmitted] = useState(false);
 
+	const [profileDetails, setProfileDetails] = useState(false);
+
 	const userRoles = [
-		capitalizeWord(UserRole.USER),
-		capitalizeWord(UserRole.ADMINISTRATOR),
-		capitalizeWord(UserRole.DEVELOPER),
+		{ label: capitalizeWord(UserRole.USER), value: UserRole.USER },
+		{ label: capitalizeWord(UserRole.ADMINISTRATOR), value: UserRole.ADMINISTRATOR },
+		{ label: capitalizeWord(UserRole.DEVELOPER), value: UserRole.DEVELOPER },
 	];
 
-	const userStatus = [capitalizeWord(StatusUser.ACTIVE), capitalizeWord(StatusUser.INACTIVE)];
+	const userStatus = [
+		{ label: capitalizeWord(StatusUser.ACTIVE), value: StatusUser.ACTIVE },
+		{ label: capitalizeWord(StatusUser.INACTIVE), value: StatusUser.INACTIVE },
+	];
 
 	const form = useForm({
 		initialValues: {
-			account: {
-				role: userRoles[0],
-				status: userStatus[0],
+			name: "",
+			email: "",
+			password: "",
+			passwordConfirm: "",
 
-				email: "",
-				password: "",
-				passwordConfirm: "",
-			},
+			role: userRoles[0].value,
+			status: userStatus[0].value,
+
 			profile: {
-				name: { first: "", last: "" },
+				firstName: "",
+				lastName: "",
 				bio: "",
 				phone: "",
 				address: "",
@@ -86,48 +75,58 @@ export default function User() {
 		},
 
 		validate: {
-			account: {
-				email: value => email(value),
-				password: value => password(value.trim(), 8, 24),
-				passwordConfirm: (value, values) => compare.string(values.account.password, value, "Password"),
-			},
+			email: value => email(value),
+			password: value => password(value.trim(), 8, 24),
+			passwordConfirm: (value, values) => compare.string(values.password, value, "Password"),
 
-			profile: {
-				name: {
-					first: value => value.trim().length > 0 && text(value.trim(), 2, 24),
-					last: value => value.trim().length > 0 && text(value.trim(), 2, 24),
-				},
-				bio: value => value.trim().length > 0 && text(value.trim(), 2, 2048, true),
-				phone: value => value.trim().length > 0 && text(value.trim(), 10, 13, true),
-				address: value => value.trim().length > 0 && text(value.trim(), 2, 48, true),
-				city: value => value.trim().length > 0 && text(value.trim(), 2, 24),
-				state: value => value.trim().length > 0 && text(value.trim(), 2, 24),
-				country: value => value.trim().length > 0 && text(value.trim(), 2, 48),
-			},
+			profile: !profileDetails
+				? undefined
+				: {
+						firstName: value => text(value.trim(), 2, 24),
+						lastName: value => text(value.trim(), 2, 24),
+						bio: value => value.trim().length > 0 && text(value.trim(), 2, 2048, true),
+						phone: value => value.trim().length > 0 && text(value.trim(), 10, 13, true),
+						address: value => value.trim().length > 0 && text(value.trim(), 2, 48, true),
+						city: value => value.trim().length > 0 && text(value.trim(), 2, 24),
+						state: value => value.trim().length > 0 && text(value.trim(), 2, 24),
+						country: value => value.trim().length > 0 && text(value.trim(), 2, 48),
+				  },
 		},
 	});
 
-	const parse = (rawData: typeFormUser) => {
-		return {
-			account: {
-				role: rawData.account.role.toUpperCase(),
-				status: rawData.account.status.toUpperCase(),
+	const parse = (): FormUserCreate => {
+		const fullName = `${capitalizeWords(form.values.profile.firstName.trim())} ${capitalizeWords(
+			form.values.profile.lastName.trim()
+		)}`;
 
-				email: rawData.account.email.trim().toLowerCase(),
-				password: rawData.account.password.trim(),
-			},
-			profile: {
-				name: {
-					first: capitalizeWord(rawData.profile.name.first.trim()),
-					last: capitalizeWord(rawData.profile.name.last.trim()),
-				},
-				bio: rawData.profile.bio.trim(),
-				phone: rawData.profile.phone.trim(),
-				address: rawData.profile.address?.trim(),
-				city: rawData.profile.city?.trim(),
-				state: rawData.profile.state?.trim(),
-				country: rawData.profile.country?.trim(),
-			},
+		return {
+			name: profileDetails && fullName.trim().length > 0 ? fullName : null,
+			email: form.values.email.trim().toLowerCase(),
+			password: form.values.password.trim(),
+
+			role: form.values.role,
+			status: form.values.status,
+
+			profile: !profileDetails
+				? undefined
+				: {
+						firstName:
+							form.values.profile.firstName.trim().length > 0
+								? capitalizeWord(form.values.profile.firstName.trim())
+								: null,
+						lastName:
+							form.values.profile.lastName.trim().length > 0
+								? capitalizeWord(form.values.profile.lastName.trim())
+								: null,
+						bio: form.values.profile.bio.trim().length > 0 ? form.values.profile.bio.trim() : null,
+						phone: form.values.profile.phone.trim().length > 0 ? form.values.profile.phone.trim() : null,
+						address:
+							form.values.profile.address?.trim().length > 0 ? form.values.profile.address?.trim() : null,
+						city: form.values.profile.city?.trim().length > 0 ? form.values.profile.city?.trim() : null,
+						state: form.values.profile.state?.trim().length > 0 ? form.values.profile.state?.trim() : null,
+						country:
+							form.values.profile.country?.trim().length > 0 ? form.values.profile.country?.trim() : null,
+				  },
 		};
 	};
 
@@ -136,16 +135,7 @@ export default function User() {
 			try {
 				setSubmitted(true);
 
-				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/user", {
-					method: enumRequest.POST,
-					body: JSON.stringify(parse(form.values)),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
-
-				const res = await response.json();
+				const res = await addUser(parse());
 
 				if (!res) {
 					notifications.show({
@@ -176,6 +166,8 @@ export default function User() {
 							variant: "failed",
 						});
 					}
+
+					form.reset();
 				}
 			} catch (error) {
 				notifications.show({
@@ -187,7 +179,6 @@ export default function User() {
 					variant: "failed",
 				});
 			} finally {
-				form.reset();
 				setSubmitted(false);
 			}
 		}
@@ -206,7 +197,7 @@ export default function User() {
 											required
 											label={"Role"}
 											placeholder={"User Role"}
-											{...form.getInputProps("account.role")}
+											{...form.getInputProps("role")}
 											data={userRoles}
 											allowDeselect={false}
 											withCheckIcon={false}
@@ -218,7 +209,7 @@ export default function User() {
 											required
 											label={"Email"}
 											placeholder="User Email"
-											{...form.getInputProps("account.email")}
+											{...form.getInputProps("email")}
 										/>
 									</GridCol>
 
@@ -227,7 +218,7 @@ export default function User() {
 											required
 											label={"Password"}
 											placeholder="User password"
-											{...form.getInputProps("account.password")}
+											{...form.getInputProps("password")}
 										/>
 									</GridCol>
 
@@ -236,7 +227,7 @@ export default function User() {
 											required
 											label={"Confirm Password"}
 											placeholder="Confirm user password"
-											{...form.getInputProps("account.passwordConfirm")}
+											{...form.getInputProps("passwordConfirm")}
 										/>
 									</GridCol>
 								</Grid>
@@ -244,83 +235,93 @@ export default function User() {
 						</GridCol>
 
 						<GridCol span={12}>
-							<Fieldset legend="Profile Details">
-								<Grid pb={"md"}>
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"First Name"}
-											placeholder="User Frist Name"
-											{...form.getInputProps("profile.name.first")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"Last Name"}
-											placeholder="User Last Name"
-											{...form.getInputProps("profile.name.last")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12 }}>
-										<Textarea
-											label={"Bio"}
-											placeholder="User Bio"
-											{...form.getInputProps("profile.bio")}
-											autosize
-											minRows={2}
-											maxRows={4}
-											resize="vertical"
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12 }}>
-										<TextInput
-											label={"Address"}
-											placeholder="User Address"
-											{...form.getInputProps("profile.address")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"Phone"}
-											placeholder="User Phone"
-											{...form.getInputProps("profile.phone")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"City"}
-											placeholder="User City"
-											{...form.getInputProps("profile.city")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"State/Province"}
-											placeholder="User State"
-											{...form.getInputProps("profile.state")}
-										/>
-									</GridCol>
-
-									<GridCol span={{ base: 12, md: 6 }}>
-										<TextInput
-											label={"Country"}
-											placeholder="User Country"
-											{...form.getInputProps("profile.country")}
-										/>
-									</GridCol>
-								</Grid>
-							</Fieldset>
+							<Checkbox
+								label="Include profile details"
+								checked={profileDetails}
+								onChange={event => setProfileDetails(event.currentTarget.checked)}
+							/>
 						</GridCol>
+
+						{profileDetails && (
+							<GridCol span={12}>
+								<Fieldset legend="Profile Details">
+									<Grid pb={"md"}>
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"First Name"}
+												placeholder="User Frist Name"
+												{...form.getInputProps("profile.firstName")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"Last Name"}
+												placeholder="User Last Name"
+												{...form.getInputProps("profile.lastName")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12 }}>
+											<Textarea
+												label={"Bio"}
+												placeholder="User Bio"
+												{...form.getInputProps("profile.bio")}
+												autosize
+												minRows={2}
+												maxRows={4}
+												resize="vertical"
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12 }}>
+											<TextInput
+												label={"Address"}
+												placeholder="User Address"
+												{...form.getInputProps("profile.address")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"Phone"}
+												placeholder="User Phone"
+												{...form.getInputProps("profile.phone")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"City"}
+												placeholder="User City"
+												{...form.getInputProps("profile.city")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"State/Province"}
+												placeholder="User State"
+												{...form.getInputProps("profile.state")}
+											/>
+										</GridCol>
+
+										<GridCol span={{ base: 12, md: 6 }}>
+											<TextInput
+												label={"Country"}
+												placeholder="User Country"
+												{...form.getInputProps("profile.country")}
+											/>
+										</GridCol>
+									</Grid>
+								</Fieldset>
+							</GridCol>
+						)}
 					</Grid>
 				</GridCol>
 
 				<GridCol span={{ base: 12, md: 4 }}>
-					<Grid pos={"sticky"} top={"var(--mantine-spacing-lg)"}>
+					<Grid pos={"sticky"} top={`calc(${values.headerHeight}px + var(--mantine-spacing-lg))`}>
 						<GridCol span={12}>
 							<Fieldset legend="User Image">
 								<DropzoneUser />
@@ -329,10 +330,10 @@ export default function User() {
 
 						<GridCol span={12}>
 							<Fieldset legend="Account Status">
-								<RadioGroup defaultValue={userStatus[0]} {...form.getInputProps("account.status")}>
+								<RadioGroup defaultValue={userStatus[0].value} {...form.getInputProps("status")}>
 									<Stack>
 										{userStatus.map(i => (
-											<Radio key={i} value={i} label={capitalizeWord(i)} />
+											<Radio key={i.value} value={i.value} label={i.label} />
 										))}
 									</Stack>
 								</RadioGroup>
@@ -341,7 +342,7 @@ export default function User() {
 					</Grid>
 				</GridCol>
 
-				<GridCol span={12}>
+				<GridCol span={12} mt={"md"}>
 					<Group>
 						<Button variant="light" type="reset" onClick={() => form.reset()} disabled={submitted}>
 							Clear

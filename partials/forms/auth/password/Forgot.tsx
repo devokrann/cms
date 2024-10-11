@@ -12,6 +12,7 @@ import { IconX } from "@tabler/icons-react";
 
 import email from "@/libraries/validators/special/email";
 import { millToMinSec } from "@/handlers/parsers/number";
+import { passwordForgot } from "@/handlers/auth";
 
 interface typeForgot {
 	email: string;
@@ -36,29 +37,17 @@ export default function Forgot() {
 		validate: { email: value => email(value) },
 	});
 
-	const parse = (rawData: typeForgot) => {
-		return { email: rawData.email };
+	const parse = () => {
+		return { email: form.values.email };
 	};
 
-	const handleSubmit = async (formValues: typeForgot) => {
+	const handleSubmit = async () => {
 		try {
 			if (form.isValid()) {
 				setSending(true);
 				setRequested(true);
 
-				// // test request body
-				// console.log(parse(formValues));
-
-				const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/password/forgot`, {
-					method: "POST",
-					body: JSON.stringify(parse(formValues)),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
-
-				const res = await response.json();
+				const res = await passwordForgot(parse());
 
 				if (!res) {
 					notifications.show({
@@ -128,7 +117,7 @@ export default function Forgot() {
 	};
 
 	return (
-		<Box component="form" onSubmit={form.onSubmit(values => handleSubmit(values))} noValidate>
+		<Box component="form" onSubmit={form.onSubmit(values => handleSubmit())} noValidate>
 			<Stack gap={"xl"}>
 				<Grid>
 					<GridCol span={{ base: 12, sm: 12 }}>
