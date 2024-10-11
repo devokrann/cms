@@ -54,7 +54,7 @@ export default function Posts() {
 					<Button
 						leftSection={<IconPlus size={16} stroke={1.5} />}
 						component={Link}
-						href={"/create/post"}
+						href={"/posts/create"}
 						size="xs"
 					>
 						New Post

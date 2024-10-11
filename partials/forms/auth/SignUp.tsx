@@ -32,9 +32,8 @@ import password from "@/libraries/validators/special/password";
 
 import compare from "@/libraries/validators/special/compare";
 
-import { SignUp as typeSignUp } from "@/types/form";
-
 import { signIn as authSignIn } from "next-auth/react";
+import { authVerify as handleVerification, authSignIn as handleSignin, authVerifyResend } from "@/handlers/auth";
 import { millToMinSec } from "@/handlers/parsers/number";
 import Brand from "@/components/Brand";
 import Link from "next/link";
@@ -74,7 +73,6 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 	};
 
 	// form 1 logic
-
 	const form = useForm({
 		initialValues: {
 			email: "",
@@ -89,30 +87,20 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 		},
 	});
 
-	const parse = (rawData: typeSignUp) => {
+	const parse = () => {
 		return {
-			email: rawData.email.trim().toLowerCase(),
-			password: rawData.password.trim(),
+			email: form.values.email.trim().toLowerCase(),
+			password: form.values.password.trim(),
 			unverified: true,
 		};
 	};
 
-	const handleSignUp = async (formValues: typeSignUp) => {
+	const handleSignUp = async () => {
 		if (form.isValid()) {
 			try {
 				setSubmitted(true);
 
-				// // test request body
-				// console.log(parse(formValues));
-
-				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/auth/sign-up", {
-					method: "POST",
-					body: JSON.stringify(parse(formValues)),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
+				const response = await handleSignin(parse());
 
 				const res = await response.json();
 
@@ -179,28 +167,16 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 		},
 	});
 
-	const parse2 = (rawData: any) => {
-		return { otp: rawData.otp, email: userEmail ? userEmail : form.values.email };
+	const parse2 = () => {
+		return { otp: form2.values.otp, email: userEmail ? userEmail : form.values.email };
 	};
 
-	const handleVerify = async (formValues: any) => {
+	const handleVerify = async () => {
 		try {
 			if (form2.isValid()) {
 				setSubmitted(true);
 
-				// // test request body
-				// console.log(parse2(formValues));
-
-				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + `/api/auth/verify`, {
-					method: "POST",
-					body: JSON.stringify(parse2(formValues)),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
-
-				const res = await response.json();
+				const res = await handleVerification(parse2());
 
 				if (!res) {
 					notifications.show(notification.noResponse);
@@ -291,17 +267,7 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 		try {
 			setRequested(true);
 
-			// // test request body
-			// console.log({ email: form.values.email });
-
-			const response = await fetch(process.env.NEXT_PUBLIC_API_URL + `/api/auth/verify/resend`, {
-				method: "POST",
-				body: JSON.stringify({ email: form.values.email }),
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-			});
+			const response = await authVerifyResend({ email: form.values.email });
 
 			const res = await response.json();
 
@@ -397,11 +363,7 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 									</Link>
 								</Group>
 
-								<Box
-									component="form"
-									onSubmit={form.onSubmit(values => handleSignUp(values))}
-									noValidate
-								>
+								<Box component="form" onSubmit={form.onSubmit(values => handleSignUp())} noValidate>
 									<Stack gap={40}>
 										<Card withBorder>
 											<Stack>
@@ -491,11 +453,7 @@ export default function SignUp({ userEmail }: { userEmail?: string }) {
 									</Link>
 								</Group>
 
-								<Box
-									component="form"
-									onSubmit={form2.onSubmit(values => handleVerify(values))}
-									noValidate
-								>
+								<Box component="form" onSubmit={form2.onSubmit(values => handleVerify())} noValidate>
 									<Stack gap={"xl"}>
 										<Card withBorder>
 											<Stack>

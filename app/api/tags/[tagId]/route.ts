@@ -21,18 +21,16 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: { tagId: string } }) {
 	try {
-		const tagTitle = await req.json();
-
 		// query database for tag
-		const tagRecord = await prisma.tag.findUnique({ where: { title: tagTitle } });
+		const tagRecord = await prisma.tag.findUnique({ where: { title: params.tagId } });
 
 		if (!tagRecord) {
 			return Response.json({ tag: { exists: false } });
 		} else {
 			// delete tag
-			await prisma.tag.delete({ where: { title: tagTitle } });
+			await prisma.tag.delete({ where: { title: params.tagId } });
 
 			return Response.json({ tag: { exists: true } });
 		}

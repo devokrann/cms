@@ -1,7 +1,7 @@
 import { CategoryCreate, CategoryGet } from "@/types/model/category";
 import { enumRequest } from "@/types/enums";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/categories`;
 const headers = {
 	"Content-Type": "application/json",
 	Accept: "application/json",
@@ -9,7 +9,7 @@ const headers = {
 
 export const getCategories = async () => {
 	try {
-		const response = await fetch(`${apiUrl}/categories`, {
+		const response = await fetch(apiUrl, {
 			method: enumRequest.GET,
 			headers,
 		});
@@ -24,7 +24,7 @@ export const getCategories = async () => {
 
 export const addCategory = async (category: CategoryCreate) => {
 	try {
-		const response = await fetch(`${apiUrl}/category`, {
+		const response = await fetch(`${apiUrl}/new-category`, {
 			method: enumRequest.POST,
 			body: JSON.stringify(category),
 			headers,
@@ -40,7 +40,7 @@ export const addCategory = async (category: CategoryCreate) => {
 
 export const removeCategory = async (category: CategoryGet) => {
 	try {
-		const response = await fetch(`${apiUrl}/category`, {
+		const response = await fetch(`${apiUrl}/${category.id}`, {
 			method: enumRequest.DELETE,
 			body: JSON.stringify(category),
 			headers,

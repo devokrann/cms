@@ -3,6 +3,7 @@ import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { AdapterUser } from "next-auth/adapters";
+import { authSignIn } from "./handlers/auth";
 
 declare module "next-auth" {
 	/**
@@ -58,20 +59,11 @@ export default {
 				rememberMe: {},
 			},
 			authorize: async credentials => {
-				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/auth/sign-in", {
-					method: "POST",
-					body: JSON.stringify(credentials),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
+				const result = await authSignIn(credentials);
 
-				if (!response.ok) {
-					return { error: response.statusText };
+				if (!result.response.ok) {
+					return { error: result.response.statusText };
 				} else {
-					const result = await response.json();
-
 					if (!result.user.exists) {
 						return { error: "User not found" };
 					} else {

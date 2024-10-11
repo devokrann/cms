@@ -17,8 +17,6 @@ import {
 	Transition,
 } from "@mantine/core";
 
-import { DateInput } from "@mantine/dates";
-
 import { hasLength, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
@@ -33,14 +31,14 @@ import {
 } from "@tabler/icons-react";
 
 import DropzonePost from "@/components/dropezones/Post";
-import { enumRequest } from "@/types/enums";
 import InputSearchUser from "@/components/inputs/search/User";
 import InputTagBlog from "@/components/inputs/tag/Blog";
 import InputContentBlog from "@/components/inputs/content/Blog";
 import InputCategoryBlog from "@/components/inputs/category/Blog";
-import { PostRelations } from "@/types/model/post";
 import values from "@/data/values";
 import { StatusPost } from "@prisma/client";
+import { addPost } from "@/handlers/database/posts";
+import { FormPostCreate } from "@/types/form";
 
 export default function Post() {
 	// Step 1: Manage the input value state
@@ -64,11 +62,12 @@ export default function Post() {
 	};
 
 	const [submitted, setSubmitted] = useState(false);
+	const [viewPost, setViewPost] = useState(false);
 	const [drafted, setDrafted] = useState(false);
+	const [viewDraft, setViewDraft] = useState(false);
 
 	const [info, setInfo] = useState(true);
 	const [warning, setWarning] = useState(true);
-	const [view, setView] = useState(false);
 
 	const form = useForm({
 		initialValues: {
@@ -90,7 +89,7 @@ export default function Post() {
 		},
 	});
 
-	const parse = () => {
+	const parse = (): FormPostCreate => {
 		return {
 			title: form.values.title.trim(),
 			content: form.values.content,
@@ -100,13 +99,15 @@ export default function Post() {
 			userId: !form.values.anonymous ? form.values.userId : "",
 			categoryId: form.values.categoryId == "clear" ? "" : form.values.categoryId,
 			tags:
-				form.values.tags.map(t => {
-					return { title: t };
-				})[0].title == "clear"
-					? []
-					: form.values.tags.map(t => {
+				form.values.tags.length > 0
+					? form.values.tags.map(t => {
 							return { title: t };
-					  }),
+					  })[0].title == "clear"
+						? []
+						: form.values.tags.map(t => {
+								return { title: t };
+						  })
+					: [],
 		};
 	};
 
@@ -130,16 +131,7 @@ export default function Post() {
 					setDrafted(true);
 				}
 
-				const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/post", {
-					method: enumRequest.POST,
-					body: JSON.stringify({ ...parse(), status: draft ? StatusPost.DRAFT : StatusPost.PUBLISHED }),
-					headers: {
-						"Content-Type": "application/json",
-						Accept: "application/json",
-					},
-				});
-
-				const res = await response.json();
+				const res = await addPost({ ...parse(), status: draft ? StatusPost.DRAFT : StatusPost.PUBLISHED });
 
 				if (!res) {
 					notifications.show({
@@ -163,10 +155,17 @@ export default function Post() {
 						handleReset();
 
 						// show view button
-						setView(true);
-						setTimeout(() => {
-							setView(false);
-						}, 5000);
+						if (draft) {
+							setViewDraft(true);
+							setTimeout(() => {
+								setViewDraft(false);
+							}, 5000);
+						} else {
+							setViewPost(true);
+							setTimeout(() => {
+								setViewPost(false);
+							}, 5000);
+						}
 					} else {
 						notifications.show({
 							id: "blog-post-create-failed-exists",
@@ -245,14 +244,26 @@ export default function Post() {
 			<Grid>
 				<GridCol span={12}>
 					<Group justify="end">
-						<Button
-							type="submit"
-							loading={submitted}
-							disabled={drafted}
-							leftSection={<IconSend size={16} stroke={1.5} />}
-						>
-							{submitted ? "Publishing" : "Publish"}
-						</Button>
+						{!viewPost ? (
+							<Button
+								type="submit"
+								loading={submitted}
+								disabled={drafted}
+								leftSection={<IconSend size={16} stroke={1.5} />}
+								onClick={() => handleSubmit()}
+							>
+								{submitted ? "Publishing" : "Publish"}
+							</Button>
+						) : (
+							<Button
+								variant="outline"
+								color="green"
+								leftSection={<IconArrowUpRight size={16} stroke={1.5} />}
+								// onClick={() => handleSubmit(true)}
+							>
+								View Post
+							</Button>
+						)}
 					</Group>
 				</GridCol>
 
@@ -352,7 +363,7 @@ export default function Post() {
 								Cancel
 							</Button>
 
-							{!view ? (
+							{!viewDraft ? (
 								<Button
 									type={"submit"}
 									variant="outline"

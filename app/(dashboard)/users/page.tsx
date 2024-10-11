@@ -55,7 +55,7 @@ export default function Users() {
 					<Button
 						leftSection={<IconPlus size={16} stroke={1.5} />}
 						component={Link}
-						href={"/create/user"}
+						href={"/users/create"}
 						size="xs"
 					>
 						New User

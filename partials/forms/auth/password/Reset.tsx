@@ -16,6 +16,7 @@ import compare from "@/libraries/validators/special/compare";
 import { signOut as authSignOut, signIn as authSignIn, useSession } from "next-auth/react";
 
 import { typeParams } from "@/app/(authentication)/auth/(default)/layout";
+import { passwordReset } from "@/handlers/auth";
 
 interface typeReset {
 	password: string;
@@ -46,22 +47,7 @@ export default function Reset({ data }: { data: typeParams }) {
 			if (form.isValid()) {
 				setSending(true);
 
-				// // test request body
-				// console.log({ id: data.userId, token: data.token, ...parse(formValues) });
-
-				const response = await fetch(
-					process.env.NEXT_PUBLIC_API_URL + `/api/auth/password/reset/${data.userId}/${data.token}`,
-					{
-						method: "POST",
-						body: JSON.stringify(parse(formValues)),
-						headers: {
-							"Content-Type": "application/json",
-							Accept: "application/json",
-						},
-					}
-				);
-
-				const res = await response.json();
+				const res = await passwordReset(parse(formValues), { userId: data.userId, token: data.token });
 
 				if (!res) {
 					notifications.show({

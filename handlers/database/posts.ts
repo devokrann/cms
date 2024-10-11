@@ -1,7 +1,8 @@
 import { enumRequest } from "@/types/enums";
+import { FormPostCreate } from "@/types/form";
 import { PostGet } from "@/types/model/post";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/posts`;
 const headers = {
 	"Content-Type": "application/json",
 	Accept: "application/json",
@@ -9,7 +10,7 @@ const headers = {
 
 export const getPosts = async () => {
 	try {
-		const response = await fetch(`${apiUrl}/posts`, {
+		const response = await fetch(apiUrl, {
 			method: enumRequest.GET,
 			headers,
 		});
@@ -24,7 +25,7 @@ export const getPosts = async () => {
 
 export const removePosts = async (posts: PostGet[]) => {
 	try {
-		const response = await fetch(`${apiUrl}/posts`, {
+		const response = await fetch(apiUrl, {
 			method: enumRequest.DELETE,
 			body: JSON.stringify(posts),
 			headers,
@@ -38,9 +39,25 @@ export const removePosts = async (posts: PostGet[]) => {
 	}
 };
 
+export const addPost = async (post: FormPostCreate) => {
+	try {
+		const response = await fetch(`${apiUrl}/new-post`, {
+			method: enumRequest.POST,
+			body: JSON.stringify(post),
+			headers,
+		});
+
+		const res = await response.json();
+
+		return res;
+	} catch (error) {
+		console.error("X-> Error adding post:", error);
+	}
+};
+
 export const removePost = async (post: PostGet) => {
 	try {
-		const response = await fetch(`${apiUrl}/post`, {
+		const response = await fetch(`${apiUrl}/${post.id}`, {
 			method: enumRequest.DELETE,
 			body: JSON.stringify(post),
 			headers,

@@ -1,5 +1,5 @@
 import prisma from "@/services/prisma";
-import { PostGet, PostRelations } from "@/types/model/post";
+import { PostRelations } from "@/types/model/post";
 
 export async function POST(req: Request) {
 	try {
@@ -37,18 +37,16 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: { postId: string } }) {
 	try {
-		const post: PostGet = await req.json();
-
 		// query database for post
-		const postRecord = await prisma.post.findUnique({ where: { id: post.id } });
+		const postRecord = await prisma.post.findUnique({ where: { id: params.postId } });
 
 		if (!postRecord) {
 			return Response.json({ post: { exists: false } });
 		} else {
 			// delete post
-			const postDelete = await prisma.post.delete({ where: { id: post.id } });
+			const postDelete = await prisma.post.delete({ where: { id: params.postId } });
 
 			return Response.json({ post: { exists: true, post: postDelete } });
 		}

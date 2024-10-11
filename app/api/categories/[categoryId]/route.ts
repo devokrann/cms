@@ -1,5 +1,5 @@
 import prisma from "@/services/prisma";
-import { CategoryCreate, CategoryGet } from "@/types/model/category";
+import { CategoryCreate } from "@/types/model/category";
 
 export async function POST(req: Request) {
 	try {
@@ -22,18 +22,16 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: { categoryId: string } }) {
 	try {
-		const category: CategoryGet = await req.json();
-
 		// query database for category
-		const categoryRecord = await prisma.category.findUnique({ where: { title: category.title } });
+		const categoryRecord = await prisma.category.findUnique({ where: { title: params.categoryId } });
 
 		if (!categoryRecord) {
 			return Response.json({ category: { exists: false } });
 		} else {
 			// delete category
-			await prisma.category.delete({ where: { title: category.title } });
+			await prisma.category.delete({ where: { title: params.categoryId } });
 
 			return Response.json({ category: { exists: true } });
 		}

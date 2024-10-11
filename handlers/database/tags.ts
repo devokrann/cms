@@ -1,7 +1,7 @@
 import { enumRequest } from "@/types/enums";
 import { TagCreate, TagGet } from "@/types/model/tag";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/tags`;
 const headers = {
 	"Content-Type": "application/json",
 	Accept: "application/json",
@@ -9,7 +9,7 @@ const headers = {
 
 export const getTags = async () => {
 	try {
-		const response = await fetch(`${apiUrl}/tags`, {
+		const response = await fetch(apiUrl, {
 			method: enumRequest.GET,
 			headers,
 		});
@@ -24,7 +24,7 @@ export const getTags = async () => {
 
 export const removeTags = async (tags: TagGet) => {
 	try {
-		const response = await fetch(`${apiUrl}/tags`, {
+		const response = await fetch(apiUrl, {
 			method: enumRequest.DELETE,
 			body: JSON.stringify(tags),
 			headers,
@@ -40,7 +40,7 @@ export const removeTags = async (tags: TagGet) => {
 
 export const addTag = async (tag: TagCreate) => {
 	try {
-		const response = await fetch(`${apiUrl}/tag`, {
+		const response = await fetch(`${apiUrl}/new-tag`, {
 			method: enumRequest.POST,
 			body: JSON.stringify(tag),
 			headers,
@@ -56,7 +56,7 @@ export const addTag = async (tag: TagCreate) => {
 
 export const removeTag = async (tag: TagGet) => {
 	try {
-		const response = await fetch(`${apiUrl}/tag`, {
+		const response = await fetch(`${apiUrl}/${tag.id}`, {
 			method: enumRequest.DELETE,
 			body: JSON.stringify(tag),
 			headers,
