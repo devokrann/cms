@@ -27,19 +27,18 @@ import projectName from "@/theme";
 
 import contact from "@/data/contact";
 
-import { SessionProvider } from "next-auth/react";
-
 import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
 
 const noto = Noto_Sans_Display({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
 	title: { default: `${contact.name.app}`, template: `%s - ${contact.name.app}` },
-	description: "App description",
+	description: "App description"
 };
 
 export default async function App({
-	children,
+	children
 }: Readonly<{
 	children: React.ReactNode;
 }>) {

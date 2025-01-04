@@ -66,7 +66,6 @@ export default function Contact() {
 						notifications.show({
 							id: "form-contact-failed-no-response",
 							icon: <IconX size={16} stroke={1.5} />,
-							autoClose: 5000,
 							title: "Server Unavailable",
 							message: `There was no response from the server.`,
 							variant: "failed",
@@ -75,7 +74,6 @@ export default function Contact() {
 						notifications.show({
 							id: "form-contact-success",
 							icon: <IconCheck size={16} stroke={1.5} />,
-							autoClose: 5000,
 							title: "Form Submitted",
 							message: "Someone will get back to you within 24 hours",
 							variant: "success",
@@ -86,7 +84,6 @@ export default function Contact() {
 				notifications.show({
 					id: "form-contact-failed",
 					icon: <IconX size={16} stroke={1.5} />,
-					autoClose: 5000,
 					title: "Submisstion Failed",
 					message: (error as Error).message,
 					variant: "failed",
